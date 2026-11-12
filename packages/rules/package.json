@@ -1,0 +1,22 @@
+{
+  "name": "@vp/rules",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Pure, framework-free cross-check rules and trust score. The AI reads documents; this package makes the decisions.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest"
+  },
+  "dependencies": {
+    "@vp/shared": "0.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.0",
+    "vitest": "^3.0.0"
+  }
+}

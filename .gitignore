@@ -1,0 +1,17 @@
+node_modules/
+dist/
+.next/
+out/
+coverage/
+*.log
+.env
+.env.local
+.env.*.local
+apps/api/.env
+apps/api/uploads/
+apps/web/.env
+.DS_Store
+.vercel
+test-results/
+playwright-report/
+*.tsbuildinfo

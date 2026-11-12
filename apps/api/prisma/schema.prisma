@@ -1,0 +1,424 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum OrganizationType {
+  SUPPLIER
+  BUYER
+  ADMIN
+}
+
+enum UserRole {
+  SUPPLIER_OWNER
+  SUPPLIER_MEMBER
+  BUYER_PROCUREMENT
+  BUYER_CONTRACTS
+  BUYER_FINANCE
+  BUYER_PROJECT
+  BUYER_APPROVER
+  ADMIN
+}
+
+enum DocType {
+  SSM
+  CIDB
+  PUBLIC_LIABILITY
+  WORKMEN_COMP
+  TAX_CLEARANCE
+  BANK_REFERENCE
+  ISO
+  OTHER
+}
+
+enum DocumentStatus {
+  UPLOADED
+  CONVERTING
+  CLASSIFYING
+  EXTRACTING
+  NEEDS_REVIEW
+  VERIFIED
+  FAILED
+}
+
+enum VendorCheckStatus {
+  DRAFT
+  IN_REVIEW
+  MORE_INFO
+  APPROVED
+  REJECTED
+}
+
+enum PassportStatus {
+  DRAFT
+  VERIFIED
+}
+
+enum Severity {
+  INFO
+  WARNING
+  CRITICAL
+}
+
+enum ReminderKind {
+  D60
+  D30
+  D7
+  EXPIRED
+}
+
+enum AccessRequestStatus {
+  PENDING
+  GRANTED
+  DECLINED
+}
+
+model Organization {
+  id             String           @id @default(uuid())
+  type           OrganizationType
+  name           String
+  registrationNo String?          @map("registration_no")
+  /// thresholds, rule weights, approver threshold, minimum coverage
+  settings       Json             @default("{}")
+  createdAt      DateTime         @default(now()) @map("created_at")
+  updatedAt      DateTime         @default(now()) @updatedAt @map("updated_at")
+
+  users                  User[]
+  invites                Invite[]
+  documents              Document[]      @relation("SupplierDocuments")
+  passport               Passport?
+  findings               Finding[]
+  vendorChecksAsBuyer    VendorCheck[]   @relation("BuyerChecks")
+  vendorChecksAsSupplier VendorCheck[]   @relation("SupplierChecks")
+  sharesAsBuyer          PassportShare[]
+  accessRequestsAsBuyer  AccessRequest[] @relation("BuyerAccessRequests")
+  accessRequestsAsSupplier AccessRequest[] @relation("SupplierAccessRequests")
+  auditLogs              AuditLog[]
+  aiUsage                AiUsage[]
+
+  @@map("organizations")
+}
+
+model User {
+  id                    String    @id @default(uuid())
+  organizationId        String    @map("organization_id")
+  name                  String
+  email                 String    @unique
+  password              String
+  role                  UserRole
+  emailVerifiedAt       DateTime? @map("email_verified_at")
+  verificationTokenHash String?   @map("verification_token_hash")
+  suspendedAt           DateTime? @map("suspended_at")
+  createdAt             DateTime  @default(now()) @map("created_at")
+  updatedAt             DateTime  @default(now()) @updatedAt @map("updated_at")
+
+  organization  Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  refreshTokens RefreshToken[]
+  notifications Notification[]
+  uploads       Document[]      @relation("UploadedBy")
+  confirmations DocumentField[] @relation("ConfirmedBy")
+  decisions     VendorCheck[]   @relation("DecidedBy")
+  createdChecks VendorCheck[]   @relation("CheckCreatedBy")
+  createdShares PassportShare[]
+  shareViews    PassportShareView[]
+  invitesSent   Invite[]
+  accessRequests AccessRequest[]
+  auditLogs     AuditLog[]
+
+  @@index([organizationId])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at")
+  revokedAt DateTime? @map("revoked_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("refresh_tokens")
+}
+
+model Invite {
+  id             String    @id @default(uuid())
+  organizationId String    @map("organization_id")
+  email          String
+  role           UserRole
+  tokenHash      String    @unique @map("token_hash")
+  invitedById    String    @map("invited_by_id")
+  expiresAt      DateTime  @map("expires_at")
+  acceptedAt     DateTime? @map("accepted_at")
+  createdAt      DateTime  @default(now()) @map("created_at")
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  invitedBy    User         @relation(fields: [invitedById], references: [id], onDelete: Cascade)
+
+  @@map("invites")
+}
+
+model Document {
+  id                       String         @id @default(uuid())
+  supplierId               String         @map("supplier_id")
+  fileKey                  String         @map("file_key")
+  fileName                 String         @map("file_name")
+  mimeType                 String         @map("mime_type")
+  size                     Int            @default(0)
+  pageCount                Int            @default(0) @map("page_count")
+  sha256                   String
+  docType                  DocType?       @map("doc_type")
+  classificationConfidence Float?         @map("classification_confidence")
+  status                   DocumentStatus @default(UPLOADED)
+  progress                 Int            @default(0)
+  error                    String?
+  attempts                 Int            @default(0)
+  issuedAt                 DateTime?      @map("issued_at") @db.Date
+  expiresAt                DateTime?      @map("expires_at") @db.Date
+  supersededById           String?        @map("superseded_by_id")
+  duplicateOfId            String?        @map("duplicate_of_id")
+  uploadedById             String         @map("uploaded_by")
+  createdAt                DateTime       @default(now()) @map("created_at")
+  updatedAt                DateTime       @default(now()) @updatedAt @map("updated_at")
+
+  supplier     Organization    @relation("SupplierDocuments", fields: [supplierId], references: [id], onDelete: Cascade)
+  uploadedBy   User            @relation("UploadedBy", fields: [uploadedById], references: [id], onDelete: Cascade)
+  supersededBy Document?       @relation("Supersession", fields: [supersededById], references: [id], onDelete: SetNull)
+  supersedes   Document[]      @relation("Supersession")
+  fields       DocumentField[]
+  reminders    Reminder[]
+  aiUsage      AiUsage[]
+
+  @@index([supplierId, status])
+  @@index([supplierId, docType])
+  @@index([expiresAt])
+  @@index([sha256])
+  @@map("documents")
+}
+
+model DocumentField {
+  id              String    @id @default(uuid())
+  documentId      String    @map("document_id")
+  key             String
+  rawValue        String?   @map("raw_value")
+  normalizedValue String?   @map("normalized_value")
+  confidence      Float     @default(0)
+  page            Int       @default(1)
+  bboxX           Float?    @map("bbox_x")
+  bboxY           Float?    @map("bbox_y")
+  bboxWidth       Float?    @map("bbox_width")
+  bboxHeight      Float?    @map("bbox_height")
+  confirmedById   String?   @map("confirmed_by")
+  confirmedAt     DateTime? @map("confirmed_at")
+  correctedValue  String?   @map("corrected_value")
+
+  document    Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+  confirmedBy User?    @relation("ConfirmedBy", fields: [confirmedById], references: [id], onDelete: SetNull)
+
+  @@unique([documentId, key])
+  @@map("document_fields")
+}
+
+model VendorCheck {
+  id               String            @id @default(uuid())
+  buyerId          String            @map("buyer_id")
+  supplierId       String            @map("supplier_id")
+  tenderTitle      String            @map("tender_title")
+  contractValue    Decimal           @map("contract_value") @db.Decimal(16, 2)
+  requiredDocTypes DocType[]         @map("required_doc_types")
+  trustScore       Int?              @map("trust_score")
+  status           VendorCheckStatus @default(DRAFT)
+  decidedById      String?           @map("decided_by")
+  decidedAt        DateTime?         @map("decided_at")
+  decisionNote     String?           @map("decision_note")
+  createdById      String            @map("created_by")
+  createdAt        DateTime          @default(now()) @map("created_at")
+  updatedAt        DateTime          @default(now()) @updatedAt @map("updated_at")
+
+  buyer     Organization @relation("BuyerChecks", fields: [buyerId], references: [id], onDelete: Cascade)
+  supplier  Organization @relation("SupplierChecks", fields: [supplierId], references: [id], onDelete: Cascade)
+  decidedBy User?        @relation("DecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
+  createdBy User         @relation("CheckCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  findings  Finding[]
+
+  @@index([buyerId, status])
+  @@index([supplierId])
+  @@map("vendor_checks")
+}
+
+model Finding {
+  id            String    @id @default(uuid())
+  supplierId    String    @map("supplier_id")
+  vendorCheckId String?   @map("vendor_check_id")
+  rule          String
+  severity      Severity
+  message       String
+  deduction     Int
+  documentIds   String[]  @map("document_ids")
+  meta          Json?
+  resolvedAt    DateTime? @map("resolved_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+
+  supplier    Organization @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  vendorCheck VendorCheck? @relation(fields: [vendorCheckId], references: [id], onDelete: Cascade)
+
+  @@index([supplierId, vendorCheckId])
+  @@map("findings")
+}
+
+model Passport {
+  id         String         @id @default(uuid())
+  supplierId String         @unique @map("supplier_id")
+  trustScore Int            @default(100) @map("trust_score")
+  status     PassportStatus @default(DRAFT)
+  verifiedAt DateTime?      @map("verified_at")
+  createdAt  DateTime       @default(now()) @map("created_at")
+  updatedAt  DateTime       @default(now()) @updatedAt @map("updated_at")
+
+  supplier Organization    @relation(fields: [supplierId], references: [id], onDelete: Cascade)
+  shares   PassportShare[]
+
+  @@map("passports")
+}
+
+model PassportShare {
+  id           String    @id @default(uuid())
+  passportId   String    @map("passport_id")
+  tokenHash    String    @unique @map("token_hash")
+  buyerId      String?   @map("buyer_id")
+  label        String?
+  createdById  String    @map("created_by")
+  expiresAt    DateTime? @map("expires_at")
+  revokedAt    DateTime? @map("revoked_at")
+  lastViewedAt DateTime? @map("last_viewed_at")
+  viewCount    Int       @default(0) @map("view_count")
+  createdAt    DateTime  @default(now()) @map("created_at")
+
+  passport  Passport            @relation(fields: [passportId], references: [id], onDelete: Cascade)
+  buyer     Organization?       @relation(fields: [buyerId], references: [id], onDelete: SetNull)
+  createdBy User                @relation(fields: [createdById], references: [id], onDelete: Cascade)
+  views     PassportShareView[]
+  accessRequests AccessRequest[]
+
+  @@index([passportId])
+  @@map("passport_shares")
+}
+
+model PassportShareView {
+  id           String   @id @default(uuid())
+  shareId      String   @map("share_id")
+  viewerUserId String?  @map("viewer_user_id")
+  viewerIp     String?  @map("viewer_ip")
+  userAgent    String?  @map("user_agent")
+  viewedAt     DateTime @default(now()) @map("viewed_at")
+
+  share  PassportShare @relation(fields: [shareId], references: [id], onDelete: Cascade)
+  viewer User?         @relation(fields: [viewerUserId], references: [id], onDelete: SetNull)
+
+  @@index([shareId])
+  @@map("passport_share_views")
+}
+
+model AccessRequest {
+  id            String              @id @default(uuid())
+  buyerId       String              @map("buyer_id")
+  supplierId    String              @map("supplier_id")
+  requestedById String              @map("requested_by")
+  message       String?
+  status        AccessRequestStatus @default(PENDING)
+  shareId       String?             @map("share_id")
+  createdAt     DateTime            @default(now()) @map("created_at")
+  updatedAt     DateTime            @default(now()) @updatedAt @map("updated_at")
+
+  buyer       Organization   @relation("BuyerAccessRequests", fields: [buyerId], references: [id], onDelete: Cascade)
+  supplier    Organization   @relation("SupplierAccessRequests", fields: [supplierId], references: [id], onDelete: Cascade)
+  requestedBy User           @relation(fields: [requestedById], references: [id], onDelete: Cascade)
+  share       PassportShare? @relation(fields: [shareId], references: [id], onDelete: SetNull)
+
+  @@index([supplierId, status])
+  @@map("access_requests")
+}
+
+model Reminder {
+  id         String       @id @default(uuid())
+  documentId String       @map("document_id")
+  dueAt      DateTime     @map("due_at")
+  kind       ReminderKind
+  sentAt     DateTime?    @map("sent_at")
+  createdAt  DateTime     @default(now()) @map("created_at")
+
+  document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@unique([documentId, kind])
+  @@index([dueAt, sentAt])
+  @@map("reminders")
+}
+
+model Notification {
+  id        String    @id @default(uuid())
+  userId    String    @map("user_id")
+  type      String
+  title     String
+  message   String
+  link      String?
+  readAt    DateTime? @map("read_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, readAt])
+  @@map("notifications")
+}
+
+model AuditLog {
+  id             String   @id @default(uuid())
+  actorId        String?  @map("actor_id")
+  organizationId String?  @map("organization_id")
+  action         String
+  entity         String
+  entityId       String?  @map("entity_id")
+  metadata       Json?
+  ip             String?
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  actor        User?         @relation(fields: [actorId], references: [id], onDelete: SetNull)
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+
+  @@index([entity, entityId])
+  @@index([organizationId, createdAt])
+  @@map("audit_logs")
+}
+
+model AiUsage {
+  id           String   @id @default(uuid())
+  documentId   String?  @map("document_id")
+  supplierId   String?  @map("supplier_id")
+  operation    String
+  model        String
+  inputTokens  Int      @map("input_tokens")
+  outputTokens Int      @map("output_tokens")
+  costUsd      Decimal  @default(0) @map("cost_usd") @db.Decimal(10, 6)
+  durationMs   Int      @default(0) @map("duration_ms")
+  cached       Boolean  @default(false)
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  document Document?     @relation(fields: [documentId], references: [id], onDelete: SetNull)
+  supplier Organization? @relation(fields: [supplierId], references: [id], onDelete: SetNull)
+
+  @@index([createdAt])
+  @@map("ai_usage")
+}
+
+model SystemSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("system_settings")
+}

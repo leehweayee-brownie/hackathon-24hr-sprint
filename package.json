@@ -1,0 +1,39 @@
+{
+  "name": "vendor-passport",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AI-powered supplier onboarding: upload once, reuse everywhere.",
+  "license": "MIT",
+  "workspaces": [
+    "packages/*",
+    "apps/*",
+    "fixtures"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "npm run build -w @vp/shared -w @vp/rules && npm run build -w @vp/api && npm run build -w @vp/web",
+    "build:packages": "npm run build -w @vp/shared -w @vp/rules",
+    "dev:api": "npm run dev -w @vp/api",
+    "dev:worker": "npm run dev:worker -w @vp/api",
+    "dev:web": "npm run dev -w @vp/web",
+    "db:migrate": "npm run db:migrate -w @vp/api",
+    "db:deploy": "npm run db:deploy -w @vp/api",
+    "db:seed": "npm run db:seed -w @vp/api",
+    "fixtures:generate": "npm run generate -w @vp/fixtures",
+    "lint": "npm run lint --workspaces --if-present",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "test": "npm test --workspaces --if-present"
+  },
+  "allowScripts": {
+    "argon2@0.44.0": true,
+    "esbuild@0.28.2": true,
+    "msgpackr-extract@3.0.7": true,
+    "prisma@6.19.3": true,
+    "sharp@0.34.5": true,
+    "@prisma/client@6.19.3": true,
+    "@prisma/engines@6.19.3": true,
+    "@scarf/scarf": false
+  }
+}

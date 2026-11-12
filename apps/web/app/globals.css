@@ -107,3 +107,19 @@ body {
 ::selection {
   background: var(--color-primary-soft);
 }
+
+/*
+ * Cursor themes (Figma "Cursor theme"): a kopitiam drink replaces the pointer everywhere.
+ * Text fields keep the I-beam so typing still shows where the caret goes. Hotspot is the top-left corner.
+ */
+html[data-cursor='kopi-o'] { --vp-cursor: url('/figma/cursors/kopi-o-cursor.png') 2 2, auto; }
+html[data-cursor='teh-tiga-lapis'] { --vp-cursor: url('/figma/cursors/teh-tiga-lapis-cursor.png') 2 2, auto; }
+html[data-cursor='teh-tarik'] { --vp-cursor: url('/figma/cursors/teh-tarik-cursor.png') 2 2, auto; }
+html[data-cursor='sirap-bandung'] { --vp-cursor: url('/figma/cursors/sirap-bandung-cursor.png') 2 2, auto; }
+html[data-cursor],
+html[data-cursor] *:not(input):not(textarea):not(select):not([contenteditable='true']) {
+  cursor: var(--vp-cursor) !important;
+}
+html[data-cursor] :is(input:not([type='checkbox']):not([type='radio']):not([type='button']):not([type='submit']), textarea, [contenteditable='true']) {
+  cursor: text !important;
+}

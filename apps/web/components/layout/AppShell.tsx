@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type SVGProps } from 'react';
 import { useAuth, useLogout } from '@/hooks/useAuth';
-import { readSidebarCollapsed, toast, useUiStore } from '@/store/ui';
+import { CursorMenu } from '@/features/cursor/CursorMenu';
+import { readCursorTheme, readSidebarCollapsed, toast, useUiStore } from '@/store/ui';
 import { cn } from '@/utils/cn';
 import { initials } from '@/utils/format';
 import { areaForUser, type Area } from '@/utils/roles';
@@ -135,6 +136,26 @@ function Sidebar({
 
       <div className="flex-1" />
 
+      {/* Figma sidebar bottom: "Cursor theme" (named Cursor Setting here) and "Sign out" rows above the user */}
+      <div className={cn('border-t border-gray-200 py-2', collapsed ? 'px-3' : 'px-4')}>
+        <CursorMenu collapsed={collapsed} />
+      </div>
+      <div className={cn('border-t border-gray-200 py-2', collapsed ? 'px-3' : 'px-4')}>
+        <button
+          type="button"
+          onClick={logout}
+          aria-label={collapsed ? 'Sign out' : undefined}
+          title={collapsed ? 'Sign out' : undefined}
+          className={cn(
+            'flex w-full items-center gap-3.5 rounded-lg py-2 text-left text-sm leading-5 text-gray-700 transition-colors hover:bg-gray-50',
+            collapsed ? 'justify-center px-2' : 'px-2.5',
+          )}
+        >
+          <LogOut className="size-4 shrink-0 text-gray-500" aria-hidden />
+          {collapsed ? null : 'Sign out'}
+        </button>
+      </div>
+
       <div ref={menuRef} className={cn('relative border-t border-gray-200', collapsed ? 'px-2 py-4' : 'p-4')}>
         {menuOpen ? (
           <div className={cn('absolute bottom-full z-10 mb-2 rounded-lg border border-gray-200 bg-white p-1 shadow-lg', collapsed ? 'left-2 w-44' : 'inset-x-4')} role="menu">
@@ -180,9 +201,12 @@ export function AppShell({ children }: { children: ReactNode }) {
   const area = areaForUser(user) ?? 'supplier';
 
   // Restore after mount so the server render and first client render match.
+  const setCursorTheme = useUiStore((s) => s.setCursorTheme);
   useEffect(() => {
     if (readSidebarCollapsed()) setCollapsed(true);
-  }, [setCollapsed]);
+    const cursor = readCursorTheme();
+    if (cursor !== 'none') setCursorTheme(cursor);
+  }, [setCollapsed, setCursorTheme]);
 
   // ⌘B / Ctrl+B toggles the desktop sidebar.
   useEffect(() => {

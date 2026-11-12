@@ -1,6 +1,7 @@
 'use client';
 
 import { create } from 'zustand';
+import { CURSOR_STORAGE_KEY, applyCursorTheme, isCursorTheme, type CursorThemeId } from '@/features/cursor/themes';
 
 export interface ToastItem {
   id: string;
@@ -18,7 +19,19 @@ interface UiState {
   /** Desktop only: sidebar shrunk to an icon rail. Remembered per browser. */
   sidebarCollapsed: boolean;
   setSidebarCollapsed: (collapsed: boolean) => void;
+  /** Mouse cursor theme. Remembered per browser and applied before first paint by the root layout script. */
+  cursorTheme: CursorThemeId;
+  setCursorTheme: (theme: CursorThemeId) => void;
 }
+
+export const readCursorTheme = (): CursorThemeId => {
+  try {
+    const v = localStorage.getItem(CURSOR_STORAGE_KEY);
+    return isCursorTheme(v) ? v : 'none';
+  } catch {
+    return 'none';
+  }
+};
 
 const COLLAPSED_KEY = 'vp-sidebar-collapsed';
 export const readSidebarCollapsed = () => {
@@ -47,6 +60,16 @@ export const useUiStore = create<UiState>()((set) => ({
       /* storage unavailable: keep it for this session only */
     }
     set({ sidebarCollapsed });
+  },
+  cursorTheme: 'none',
+  setCursorTheme: (cursorTheme) => {
+    try {
+      localStorage.setItem(CURSOR_STORAGE_KEY, cursorTheme);
+    } catch {
+      /* storage unavailable: keep it for this session only */
+    }
+    applyCursorTheme(cursorTheme);
+    set({ cursorTheme });
   },
 }));
 

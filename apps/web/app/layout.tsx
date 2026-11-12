@@ -8,7 +8,8 @@ export const metadata: Metadata = {
   description: 'AI-powered supplier onboarding. Upload once, reuse everywhere.',
 };
 
-const themeScript = `(function(){try{var t=localStorage.getItem('vp-theme');if(t==='dark'){document.documentElement.classList.add('dark')}}catch(e){}})();`;
+// Applies the saved theme and cursor before first paint, so neither flashes on load.
+const themeScript = `(function(){try{var d=document.documentElement;var t=localStorage.getItem('vp-theme');if(t==='dark'){d.classList.add('dark')}var c=localStorage.getItem('vp-cursor');if(c&&c!=='none'&&/^[a-z-]+$/.test(c)){d.dataset.cursor=c}}catch(e){}})();`;
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (

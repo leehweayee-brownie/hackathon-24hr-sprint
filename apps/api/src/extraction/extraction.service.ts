@@ -39,10 +39,14 @@ export class ExtractionService {
     return this.provider.name;
   }
 
-  /** Reuses the classification and fields of an earlier document with the same content hash. */
+  /**
+   * Reuses the result of an earlier read of the same file, but only one produced by the model in use now.
+   * Results from another provider or model (for example the offline mock) are never reused, so switching
+   * AI_PROVIDER or ODIN_MODEL sends files to the new model.
+   */
   async findCached(documentId: string, sha256: string): Promise<ExtractionOutcome | null> {
     const prior = await this.prisma.document.findFirst({
-      where: { sha256, id: { not: documentId }, docType: { not: null }, status: { in: [DocumentStatus.VERIFIED, DocumentStatus.NEEDS_REVIEW] } },
+      where: { sha256, id: { not: documentId }, docType: { not: null }, extractedBy: this.currentModel, status: { in: [DocumentStatus.VERIFIED, DocumentStatus.NEEDS_REVIEW] } },
       orderBy: { createdAt: 'desc' },
       include: { fields: true },
     });
@@ -64,19 +68,19 @@ export class ExtractionService {
   async classify(documentId: string, supplierId: string, input: DocumentInput): Promise<ClassificationResult> {
     const started = Date.now();
     const result = await this.provider.classify(input);
-    await this.usage.record({ documentId, supplierId, operation: 'classify', model: this.modelName, usage: result.usage, durationMs: Date.now() - started });
+    await this.usage.record({ documentId, supplierId, operation: 'classify', model: this.currentModel, usage: result.usage, durationMs: Date.now() - started });
     return result;
   }
 
   async extract(documentId: string, supplierId: string, input: DocumentInput, docType: DocType): Promise<NormalizedField[]> {
     const started = Date.now();
     const result = await this.provider.extract(input, docType);
-    await this.usage.record({ documentId, supplierId, operation: 'extract', model: this.modelName, usage: result.usage, durationMs: Date.now() - started });
+    await this.usage.record({ documentId, supplierId, operation: 'extract', model: this.currentModel, usage: result.usage, durationMs: Date.now() - started });
     return normalizeFields(docType, result.fields);
   }
 
   async recordCacheHit(documentId: string, supplierId: string): Promise<void> {
-    await this.usage.record({ documentId, supplierId, operation: 'extract', model: this.modelName, usage: undefined, durationMs: 0, cached: true });
+    await this.usage.record({ documentId, supplierId, operation: 'extract', model: this.currentModel, usage: undefined, durationMs: 0, cached: true });
   }
 
   /** Persists fields and derives issuedAt / expiresAt + the review status. */
@@ -106,13 +110,14 @@ export class ExtractionService {
       }),
       this.prisma.document.update({
         where: { id: documentId },
-        data: { docType, classificationConfidence: classification.confidence, issuedAt, expiresAt, status, progress: 100, error: null },
+        data: { docType, classificationConfidence: classification.confidence, extractedBy: this.currentModel, issuedAt, expiresAt, status, progress: 100, error: null },
       }),
     ]);
     return status;
   }
 
-  private get modelName(): string {
+  /** The provider/model that reads documents right now; stored on each document as `extractedBy`. */
+  get currentModel(): string {
     if (this.provider.name === 'mock') return 'mock';
     if (this.provider.name === 'odin') return `odin/${this.config.get('ODIN_MODEL')}`;
     return this.config.get('AI_MODEL');

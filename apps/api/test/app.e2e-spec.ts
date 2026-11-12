@@ -95,6 +95,31 @@ describe('Vendor Passport API (e2e)', () => {
     expect(doc.body.data.progress).toBe(100);
   });
 
+  it('copies a duplicate only when the current model read the original', async () => {
+    const server = app.getHttpServer();
+    const auth = { authorization: `Bearer ${accessToken}` };
+    const upload = async () => {
+      const res = await request(server).post('/api/v1/documents').set(auth).attach('files', PNG, 'site-photo.png').expect(201);
+      await app.get(DocumentPipelineRunner).idle();
+      return (await request(server).get(`/api/v1/documents/${res.body.data[0].id}`).set(auth).expect(200)).body.data;
+    };
+
+    // Same model (mock) read the original: the duplicate is copied, not read again.
+    const copy = await upload();
+    expect(copy.duplicateOfId).toBeTruthy();
+    expect(copy.status).toBe('VERIFIED');
+
+    // Pretend every earlier copy was read by another model: the file must be read again.
+    const prisma = app.get(PrismaService);
+    const user = await prisma.user.findUniqueOrThrow({ where: { email } });
+    await prisma.document.updateMany({ where: { supplierId: user.organizationId }, data: { extractedBy: 'some-other-model' } });
+    const reread = await upload();
+    expect(reread.duplicateOfId).toBeNull();
+    expect(reread.status).toBe('VERIFIED');
+    const fresh = await prisma.document.findUniqueOrThrow({ where: { id: reread.id } });
+    expect(fresh.extractedBy).toBe('mock');
+  });
+
   it('rejects unsupported files on content, not extension', async () => {
     const res = await request(app.getHttpServer())
       .post('/api/v1/documents')

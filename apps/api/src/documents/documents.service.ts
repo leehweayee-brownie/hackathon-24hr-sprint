@@ -11,6 +11,7 @@ import { sha256 } from '../common/utils/crypto';
 import { AppConfigService } from '../config/config.service';
 import { CrossCheckService } from '../cross-check/cross-check.service';
 import { PrismaService } from '../database/prisma.service';
+import { ExtractionService } from '../extraction/extraction.service';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { documentKey } from '../storage/adapters/storage.adapter';
 import { StorageService } from '../storage/storage.service';
@@ -41,6 +42,7 @@ export class DocumentsService {
     private readonly crossCheck: CrossCheckService,
     private readonly audit: AuditService,
     private readonly pipeline: DocumentPipelineRunner,
+    private readonly extraction: ExtractionService,
   ) {}
 
   /** Stores each file, detects duplicates and starts processing in the background. */
@@ -58,8 +60,17 @@ export class DocumentsService {
       if (file.size > maxBytes) throw new AppException(ErrorCode.FILE_TOO_LARGE, `${file.originalname} is larger than ${this.config.get('MAX_FILE_SIZE_MB')} MB`, HttpStatus.PAYLOAD_TOO_LARGE);
       const mimeType = await this.detectMime(file);
       const hash = sha256(file.buffer);
+      // An identical file this supplier already has, read by the model in use now. A copy read by another
+      // provider or model (for example the offline mock) does not count, so the file is read again.
       const original = await this.prisma.document.findFirst({
-        where: { supplierId: user.organizationId, sha256: hash, duplicateOfId: null },
+        where: {
+          supplierId: user.organizationId,
+          sha256: hash,
+          duplicateOfId: null,
+          docType: { not: null },
+          extractedBy: this.extraction.currentModel,
+          status: { in: [DocumentStatus.VERIFIED, DocumentStatus.NEEDS_REVIEW] },
+        },
         orderBy: { createdAt: 'asc' },
         include: { fields: true },
       });
@@ -81,13 +92,14 @@ export class DocumentsService {
       await this.storage.put(key, file.buffer, { contentType: mimeType, fileName: file.originalname });
       let updated = await this.prisma.document.update({ where: { id: doc.id }, data: { fileKey: key }, include: { fields: true } });
 
-      if (original && original.docType && [DocumentStatus.VERIFIED, DocumentStatus.NEEDS_REVIEW].includes(original.status as DocumentStatus)) {
-        // Exact duplicate of an already-read file: copy the result, keep it out of the rules (superseded by the original).
+      if (original) {
+        // Exact duplicate of a file already read by the current model: copy the result, keep it out of the rules (superseded by the original).
         updated = await this.prisma.document.update({
           where: { id: doc.id },
           data: {
             docType: original.docType,
             classificationConfidence: original.classificationConfidence,
+            extractedBy: original.extractedBy,
             pageCount: original.pageCount,
             issuedAt: original.issuedAt,
             expiresAt: original.expiresAt,

@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { DocType } from '@vp/shared';
 import { resolveRelativeDate } from '../common/utils/dates';
-import { normalizeFields } from './extraction.service';
+import { ExtractionService, normalizeFields } from './extraction.service';
 import { MockExtractionProvider } from './providers/mock.provider';
 import { extractJson, extractionSchema } from './schemas';
 
@@ -95,5 +95,28 @@ describe('extractionSchema', () => {
       ],
     });
     expect(parsed.fields.map((f) => f.rawValue)).toEqual(['B, CE', '2000000', null]);
+  });
+});
+
+describe('ExtractionService cache', () => {
+  function service(providerName: string, prior: unknown) {
+    const findFirst = jest.fn(async () => prior);
+    const prisma = { document: { findFirst } };
+    const config = { get: (k: string) => (k === 'ODIN_MODEL' ? 'gemini-3.5-flash' : 'claude-sonnet-5-5') };
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const svc = new ExtractionService({ name: providerName } as any, prisma as any, {} as any, config as any);
+    return { svc, findFirst };
+  }
+
+  it('names the model in use', () => {
+    expect(service('odin', null).svc.currentModel).toBe('odin/gemini-3.5-flash');
+    expect(service('mock', null).svc.currentModel).toBe('mock');
+    expect(service('anthropic', null).svc.currentModel).toBe('claude-sonnet-5-5');
+  });
+
+  it('only reuses results produced by the model in use', async () => {
+    const { svc, findFirst } = service('odin', null);
+    await expect(svc.findCached('doc-2', 'abc')).resolves.toBeNull();
+    expect(findFirst).toHaveBeenCalledWith(expect.objectContaining({ where: expect.objectContaining({ sha256: 'abc', extractedBy: 'odin/gemini-3.5-flash' }) }));
   });
 });

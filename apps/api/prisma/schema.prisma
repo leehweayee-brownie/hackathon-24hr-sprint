@@ -175,6 +175,8 @@ model Document {
   sha256                   String
   docType                  DocType?       @map("doc_type")
   classificationConfidence Float?         @map("classification_confidence")
+  /// Provider/model that produced docType and fields (e.g. "odin/gemini-3.5-flash", "mock"). Cached and duplicate results are only reused for the same value.
+  extractedBy              String?        @map("extracted_by")
   status                   DocumentStatus @default(UPLOADED)
   progress                 Int            @default(0)
   error                    String?

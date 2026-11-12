@@ -19,7 +19,8 @@ function nestServer(): Promise<Server> {
       const { AppModule } = await import('./app.module');
       const { configureApp } = await import('./app.setup');
       // abortOnError: false so a boot failure rejects (and is answered with 503) instead of exiting the process.
-      const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true, abortOnError: false });
+      // No bufferLogs here: nothing flushes the buffer in a function, so request errors would never reach Vercel's logs.
+      const app = await NestFactory.create<NestExpressApplication>(AppModule, { abortOnError: false });
       configureApp(app);
       await app.init();
       new Logger('Serverless').log('Nest application ready');

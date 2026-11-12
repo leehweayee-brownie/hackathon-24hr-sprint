@@ -103,6 +103,7 @@ Setup:
 
 How it behaves on Vercel:
 
+- **Region**: `apps/api/vercel.json` pins the function to `syd1` (Sydney), next to the Supabase database in `ap-southeast-2`. Every request makes several database round trips, so keep the function in the database's region; change both together.
 - **Background processing** after upload is kept alive with `waitUntil`, up to the function's `maxDuration` (300 s, the Hobby maximum; raise it in `vercel.json` on Pro). Documents left unfinished are not resumed automatically on Vercel; use Reprocess.
 - **Uploads are limited to 4.5 MB per request** by Vercel. Larger scans fail with `413 FUNCTION_PAYLOAD_TOO_LARGE` until uploads go directly from the browser to storage.
 - **Live updates** reconnect automatically when a function instance recycles.

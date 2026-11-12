@@ -1,8 +1,8 @@
 'use client';
 
 import { MAX_FILE_SIZE_BYTES, MAX_FILES_PER_UPLOAD } from '@vp/shared';
-import { FolderUp, UploadCloud } from 'lucide-react';
-import { useCallback } from 'react';
+import { CloudUpload, FolderUp, Upload } from 'lucide-react';
+import { useCallback, useRef } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { cn } from '@/utils/cn';
 
@@ -13,15 +13,19 @@ const ACCEPT = {
   'image/heic': ['.heic'],
   'image/heif': ['.heif'],
 };
+const ACCEPT_ATTR = '.pdf,.jpg,.jpeg,.png,.heic,.heif';
+const MAX_MB = Math.round(MAX_FILE_SIZE_BYTES / 1024 / 1024);
 
-export function DropZone({ onFiles, disabled, compact }: { onFiles: (files: File[]) => void; disabled?: boolean; compact?: boolean }) {
+/** Figma "Dropzone": dashed gray-300, 56px brand-tint icon circle, prompt with a red "browse" link and a primary button. */
+export function DropZone({ onFiles, disabled }: { onFiles: (files: File[]) => void; disabled?: boolean }) {
+  const fileInput = useRef<HTMLInputElement>(null);
   const onDrop = useCallback(
     (accepted: File[]) => {
       if (accepted.length) onFiles(accepted.slice(0, MAX_FILES_PER_UPLOAD));
     },
     [onFiles],
   );
-  const { getRootProps, getInputProps, isDragActive, fileRejections, open } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, fileRejections } = useDropzone({
     onDrop,
     accept: ACCEPT,
     maxSize: MAX_FILE_SIZE_BYTES,
@@ -30,43 +34,62 @@ export function DropZone({ onFiles, disabled, compact }: { onFiles: (files: File
     noClick: true,
     useFsAccessApi: false,
   });
+  const browse = () => fileInput.current?.click();
 
   return (
     <div
       {...getRootProps()}
       className={cn(
-        'relative flex flex-col items-center justify-center rounded-card border-2 border-dashed bg-panel text-center transition-colors duration-220',
-        compact ? 'px-4 py-5' : 'px-6 py-14',
-        isDragActive ? 'border-primary bg-primary-soft' : 'border-line hover:border-ink-3',
+        'flex w-full flex-col items-center gap-3 rounded-xl border-2 border-dashed p-8 text-center transition-colors',
+        isDragActive ? 'border-brand bg-brand-tint' : 'border-gray-300 bg-white',
         disabled && 'opacity-60',
       )}
       data-testid="dropzone"
     >
-      <input {...getInputProps()} data-testid="dropzone-input" {...({ webkitdirectory: '' } as Record<string, string>)} />
-      <input type="file" multiple accept=".pdf,.jpg,.jpeg,.png,.heic,.heif" className="hidden" data-testid="file-input" onChange={(e) => e.target.files && onFiles(Array.from(e.target.files))} />
-      <span className={cn('flex items-center justify-center rounded-full bg-primary-soft text-primary', compact ? 'size-9' : 'size-12')}>
-        {isDragActive ? <FolderUp className={compact ? 'size-4' : 'size-6'} /> : <UploadCloud className={compact ? 'size-4' : 'size-6'} />}
+      <input {...getInputProps()} data-testid="dropzone-input" />
+      <input
+        ref={fileInput}
+        type="file"
+        multiple
+        accept={ACCEPT_ATTR}
+        className="hidden"
+        data-testid="file-input"
+        onChange={(e) => {
+          if (e.target.files?.length) onFiles(Array.from(e.target.files).slice(0, MAX_FILES_PER_UPLOAD));
+          e.target.value = '';
+        }}
+      />
+      <span className="flex size-14 items-center justify-center rounded-full bg-brand-tint">
+        {isDragActive ? <FolderUp className="size-7 text-brand" aria-hidden /> : <CloudUpload className="size-7 text-brand" aria-hidden />}
       </span>
-      <p className={cn('font-medium text-ink', compact ? 'mt-2 text-[13px]' : 'mt-4 text-[15px]')}>
-        {isDragActive ? 'Drop to start sorting' : 'Drop a folder of documents here'}
+      <p className="text-base font-medium leading-6 text-gray-800">
+        {isDragActive ? (
+          'Drop to start sorting'
+        ) : (
+          <>
+            Drag &amp; drop files or a folder here, or{' '}
+            <button type="button" onClick={browse} disabled={disabled} className="font-semibold text-brand hover:underline">
+              browse
+            </button>
+          </>
+        )}
       </p>
-      {!compact ? <p className="mt-1 max-w-md text-[13px] text-muted">PDF, JPG, PNG or HEIC, multi-page scans welcome. Each file is classified, read and cross-checked automatically.</p> : null}
-      <div className={cn('flex gap-2', compact ? 'mt-2' : 'mt-5')}>
-        <button type="button" onClick={open} className="rounded-card border border-line bg-panel px-3 py-1.5 text-[13px] font-medium text-ink hover:bg-surface" disabled={disabled}>
-          Choose folder
-        </button>
+      <p className="text-sm leading-5 text-gray-500">
+        PDF, JPG, PNG or HEIC · max {MAX_MB} MB per file · up to {MAX_FILES_PER_UPLOAD} files per batch
+      </p>
+      <div className="flex gap-2 pt-1">
         <button
           type="button"
-          onClick={(e) => (e.currentTarget.parentElement?.parentElement?.querySelector<HTMLInputElement>('[data-testid="file-input"]'))?.click()}
-          className="rounded-card px-3 py-1.5 text-[13px] font-medium text-primary hover:bg-primary-soft"
+          onClick={browse}
           disabled={disabled}
+          className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-3 py-2 text-sm font-medium leading-5 text-white hover:bg-brand-hover disabled:opacity-50"
         >
-          or pick files
+          <Upload className="size-4" aria-hidden /> Browse files
         </button>
       </div>
       {fileRejections.length > 0 ? (
-        <p className="mt-3 text-[12px] text-danger">
-          {fileRejections.length} file{fileRejections.length === 1 ? '' : 's'} skipped: unsupported type or over {Math.round(MAX_FILE_SIZE_BYTES / 1024 / 1024)} MB.
+        <p className="text-xs text-danger">
+          {fileRejections.length} file{fileRejections.length === 1 ? '' : 's'} skipped: unsupported type or over {MAX_MB} MB.
         </p>
       ) : null}
     </div>

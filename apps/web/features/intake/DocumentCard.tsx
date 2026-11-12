@@ -2,15 +2,25 @@
 
 import { DocumentStatus, type DocumentView } from '@vp/shared';
 import { motion } from 'framer-motion';
-import { AlertCircle, Copy, FileImage, FileText, History, RefreshCw, Trash2 } from 'lucide-react';
+import { AlertCircle, Copy, FileCheck, FileClock, FileWarning, FileX, History, Loader2, RefreshCw, Trash2 } from 'lucide-react';
 import Link from 'next/link';
-import { Badge } from '@/components/ui/Badge';
-import { DocumentStatusChip } from '@/components/ui/StatusChip';
 import { cn } from '@/utils/cn';
-import { formatDate, formatPercent } from '@/utils/format';
+import { formatBytes, formatDate } from '@/utils/format';
 import { isProcessing } from '@/utils/status';
 import { countNeedsReview } from './grouping';
 
+type Tone = 'teal' | 'amber' | 'red' | 'brand' | 'gray';
+
+/** Figma "File tile": 36px, tinted fill and border, 18px file icon. Tint follows the document's state. */
+const TILE: Record<Tone, string> = {
+  teal: 'border-teal-200 bg-teal-50 text-teal-600',
+  amber: 'border-amber-200 bg-amber-50 text-amber-600',
+  red: 'border-red-200 bg-red-50 text-red-600',
+  brand: 'border-brand-100 bg-brand-tint text-brand',
+  gray: 'border-gray-200 bg-gray-50 text-gray-500',
+};
+
+/** Figma "Col / Document": compact file row with a tinted file tile, name, and "size · pages" meta. */
 export function DocumentCard({
   doc,
   href,
@@ -25,8 +35,17 @@ export function DocumentCard({
   threshold?: number;
 }) {
   const processing = isProcessing(doc.status);
-  const review = countNeedsReview(doc, threshold);
-  const Icon = doc.mimeType.startsWith('image/') ? FileImage : FileText;
+  const failed = doc.status === DocumentStatus.FAILED;
+  const review = doc.status === DocumentStatus.NEEDS_REVIEW ? countNeedsReview(doc, threshold) : 0;
+  const tone: Tone = processing ? 'brand' : failed ? 'red' : review > 0 ? 'amber' : doc.supersededById ? 'gray' : 'teal';
+  const Icon = processing ? FileClock : failed ? FileX : review > 0 ? FileWarning : FileCheck;
+
+  const meta = [
+    formatBytes(doc.size),
+    doc.pageCount > 0 ? `${doc.pageCount} page${doc.pageCount === 1 ? '' : 's'}` : null,
+    doc.expiresAt ? `expires ${formatDate(doc.expiresAt)}` : null,
+  ].filter(Boolean);
+
   return (
     <motion.div
       layout
@@ -35,68 +54,78 @@ export function DocumentCard({
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, scale: 0.96 }}
       transition={{ layout: { duration: 0.4, ease: [0.2, 0, 0, 1] }, duration: 0.22 }}
-      className={cn('group rounded-card border border-line bg-panel p-3 shadow-card', processing && 'border-primary/40')}
+      className="group flex items-center gap-3 rounded-lg p-2 hover:bg-gray-50"
       data-testid="document-card"
       data-document-id={doc.id}
       data-status={doc.status}
     >
-      <div className="flex items-start gap-2.5">
-        <span className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-[6px] bg-surface text-ink-3">
-          <Icon className="size-4" aria-hidden />
-        </span>
-        <div className="min-w-0 flex-1">
-          <Link href={href} className="block truncate text-[13px] font-medium text-ink hover:text-primary" title={doc.fileName}>
-            {doc.fileName}
-          </Link>
-          <p className="truncate text-[12px] text-muted">
-            {doc.pageCount > 0 ? `${doc.pageCount} page${doc.pageCount === 1 ? '' : 's'}` : 'Uploaded'}
-            {doc.classificationConfidence !== null ? ` · sorted at ${formatPercent(doc.classificationConfidence)}` : ''}
-            {doc.expiresAt ? ` · expires ${formatDate(doc.expiresAt)}` : ''}
+      <span className={cn('flex size-9 shrink-0 items-center justify-center rounded-lg border', TILE[tone])}>
+        <Icon className="size-[18px]" aria-hidden />
+      </span>
+      <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+        <Link href={href} className="truncate text-sm font-medium leading-5 text-gray-800 hover:text-brand" title={doc.fileName}>
+          {doc.fileName}
+        </Link>
+        <p className="flex min-w-0 items-center gap-1.5 text-xs leading-4 text-gray-500">
+          {processing ? (
+            <span className="inline-flex shrink-0 items-center gap-1 text-brand">
+              <Loader2 className="size-3 animate-spin" aria-hidden /> Reading {Math.round(doc.progress)}% ·
+            </span>
+          ) : null}
+          <span className="truncate">{meta.join(' · ')}</span>
+        </p>
+        {failed ? (
+          <p className="flex items-start gap-1 text-xs leading-4 text-red-600">
+            <AlertCircle className="mt-px size-3 shrink-0" aria-hidden /> {doc.error ?? 'Could not read this file'}
           </p>
-        </div>
+        ) : null}
       </div>
-      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-        <DocumentStatusChip status={doc.status} progress={doc.progress} />
-        {doc.status === DocumentStatus.NEEDS_REVIEW && review > 0 ? (
-          <Badge tone="warning" data-testid="needs-review-count">
+
+      <div className="flex shrink-0 items-center gap-1.5">
+        {review > 0 ? (
+          <span className="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium leading-4 text-amber-800" data-testid="needs-review-count">
             {review} to confirm
-          </Badge>
+          </span>
         ) : null}
         {doc.duplicateOfId ? (
-          <Badge tone="neutral">
+          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium leading-4 text-gray-700">
             <Copy className="size-3" aria-hidden /> Duplicate
-          </Badge>
+          </span>
         ) : null}
         {doc.supersededById ? (
-          <Badge tone="neutral">
+          <span className="inline-flex items-center gap-1 rounded-full bg-gray-100 px-2 py-0.5 text-xs font-medium leading-4 text-gray-700">
             <History className="size-3" aria-hidden /> Superseded
-          </Badge>
+          </span>
+        ) : null}
+        {(onDelete || onReprocess) && !processing ? (
+          <div className="flex items-center opacity-0 transition-opacity focus-within:opacity-100 group-hover:opacity-100">
+            {onReprocess ? (
+              <button
+                type="button"
+                onClick={() => onReprocess(doc)}
+                aria-label={`Reprocess ${doc.fileName}`}
+                title="Reprocess"
+                className="rounded-md p-1.5 text-gray-500 hover:bg-gray-100 hover:text-gray-800"
+                data-testid="reprocess"
+              >
+                <RefreshCw className="size-3.5" aria-hidden />
+              </button>
+            ) : null}
+            {onDelete ? (
+              <button
+                type="button"
+                onClick={() => onDelete(doc)}
+                aria-label={`Delete ${doc.fileName}`}
+                title="Delete"
+                className="rounded-md p-1.5 text-gray-500 hover:bg-red-50 hover:text-red-600"
+                data-testid="delete"
+              >
+                <Trash2 className="size-3.5" aria-hidden />
+              </button>
+            ) : null}
+          </div>
         ) : null}
       </div>
-      {processing ? (
-        <div className="mt-2 h-1 overflow-hidden rounded-full bg-line-soft" aria-hidden>
-          <motion.div className="h-full bg-primary" animate={{ width: `${Math.max(8, doc.progress)}%` }} transition={{ duration: 0.4 }} />
-        </div>
-      ) : null}
-      {doc.status === DocumentStatus.FAILED ? (
-        <p className="mt-2 flex items-start gap-1.5 text-[12px] text-danger">
-          <AlertCircle className="mt-0.5 size-3.5 shrink-0" aria-hidden /> {doc.error ?? 'Could not read this file'}
-        </p>
-      ) : null}
-      {(onDelete || onReprocess) && !processing ? (
-        <div className="mt-2 flex gap-1 opacity-0 transition-opacity group-hover:opacity-100 focus-within:opacity-100">
-          {onReprocess ? (
-            <button onClick={() => onReprocess(doc)} className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[12px] text-ink-3 hover:bg-line-soft hover:text-ink" data-testid="reprocess">
-              <RefreshCw className="size-3" /> Reprocess
-            </button>
-          ) : null}
-          {onDelete ? (
-            <button onClick={() => onDelete(doc)} className="inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[12px] text-ink-3 hover:bg-danger-soft hover:text-danger" data-testid="delete">
-              <Trash2 className="size-3" /> Delete
-            </button>
-          ) : null}
-        </div>
-      ) : null}
     </motion.div>
   );
 }

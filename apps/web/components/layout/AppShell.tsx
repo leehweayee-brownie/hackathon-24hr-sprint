@@ -137,10 +137,14 @@ function Sidebar({
 
       <div className="flex-1" />
 
-      {/* Figma sidebar bottom: "Cursor theme" (named Cursor Setting here) and "Sign out" rows above the user */}
+      {/* Figma sidebar bottom: "Cursor theme" (named Cursor Setting here) above the user */}
       <div className={cn('border-t border-gray-200 py-2', collapsed ? 'px-3' : 'px-4')}>
         <CursorMenu collapsed={collapsed} />
       </div>
+
+      <div ref={menuRef}>
+        {/* "Sign out" stays hidden until the profile arrow is clicked */}
+        {menuOpen ? (
       <div className={cn('border-t border-gray-200 py-2', collapsed ? 'px-3' : 'px-4')}>
         <button
           type="button"
@@ -156,20 +160,13 @@ function Sidebar({
           {collapsed ? null : 'Sign out'}
         </button>
       </div>
-
-      <div ref={menuRef} className={cn('relative border-t border-gray-200', collapsed ? 'px-2 py-4' : 'p-4')}>
-        {menuOpen ? (
-          <div className={cn('absolute bottom-full z-10 mb-2 rounded-lg border border-gray-200 bg-white p-1 shadow-lg', collapsed ? 'left-2 w-44' : 'inset-x-4')} role="menu">
-            <button type="button" role="menuitem" onClick={logout} className="flex w-full items-center gap-2 rounded-md px-2.5 py-2 text-left text-sm text-gray-700 hover:bg-gray-50">
-              <LogOut className="size-4 text-gray-500" aria-hidden /> Sign out
-            </button>
-          </div>
         ) : null}
+
+      <div className={cn('relative border-t border-gray-200', collapsed ? 'px-2 py-4' : 'p-4')}>
         <button
           type="button"
           onClick={() => setMenuOpen((o) => !o)}
           aria-expanded={menuOpen}
-          aria-haspopup="menu"
           aria-label={collapsed ? `Account menu for ${user?.name ?? 'user'}` : undefined}
           title={collapsed ? user?.name : undefined}
           className={cn('flex w-full items-center gap-2.5 rounded-lg text-left', collapsed && 'justify-center')}
@@ -184,10 +181,11 @@ function Sidebar({
                 <span className="rounded-full bg-brand-100 px-2.5 py-1 text-xs font-medium leading-4 text-brand-800">{AREA_BADGE[area]}</span>
                 <span className="w-full truncate text-xs leading-4 text-gray-500">{user?.organizationName}</span>
               </span>
-              <ChevronDown className="size-4 shrink-0 text-gray-400" aria-hidden />
+              <ChevronDown className={cn('size-4 shrink-0 text-gray-400 transition-transform', menuOpen && 'rotate-180')} aria-hidden />
             </>
           )}
         </button>
+      </div>
       </div>
     </div>
   );

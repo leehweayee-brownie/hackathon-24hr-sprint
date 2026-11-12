@@ -21,16 +21,4 @@ export class AppConfigService {
       .map((s) => s.trim())
       .filter(Boolean);
   }
-
-  get redisOptions(): { host: string; port: number; password?: string; username?: string; db?: number; tls?: object } {
-    const url = new URL(this.get('REDIS_URL'));
-    return {
-      host: url.hostname,
-      port: Number(url.port || 6379),
-      password: url.password ? decodeURIComponent(url.password) : undefined,
-      username: url.username ? decodeURIComponent(url.username) : undefined,
-      db: url.pathname && url.pathname !== '/' ? Number(url.pathname.slice(1)) : undefined,
-      tls: url.protocol === 'rediss:' ? {} : undefined,
-    };
-  }
 }

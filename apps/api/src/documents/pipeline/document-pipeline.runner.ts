@@ -1,4 +1,5 @@
 import { Injectable, Logger, OnApplicationBootstrap, Optional } from '@nestjs/common';
+import { waitUntil } from '@vercel/functions';
 import { DocumentStatus } from '@vp/shared';
 import { AppException } from '../../common/errors/app.exception';
 import { AppConfigService } from '../../config/config.service';
@@ -15,7 +16,10 @@ export const RETRY_DELAYS_MS = [2_000, 4_000];
 /**
  * Runs the document pipeline in the API process, in the background after upload.
  * A small FIFO with a concurrency limit replaces the old queue and worker: no Redis jobs, nothing else to start.
- * Documents left mid-pipeline by a restart are picked up again on boot.
+ * Documents left mid-pipeline by a restart are picked up again on boot (long-running server only).
+ *
+ * On Vercel the work is handed to `waitUntil`, so the function instance stays alive until processing
+ * finishes (up to the function's maxDuration) even though the upload response has already been sent.
  */
 @Injectable()
 export class DocumentPipelineRunner implements OnApplicationBootstrap {
@@ -38,6 +42,9 @@ export class DocumentPipelineRunner implements OnApplicationBootstrap {
   }
 
   async onApplicationBootstrap(): Promise<void> {
+    // Serverless instances start and stop all the time, several at once: resuming there would process
+    // the same document in parallel. Use Reprocess for anything left behind instead.
+    if (process.env.VERCEL) return;
     const stranded = await this.prisma.document.findMany({
       where: { status: { in: IN_PIPELINE_STATUSES } },
       select: { id: true },
@@ -69,7 +76,7 @@ export class DocumentPipelineRunner implements OnApplicationBootstrap {
     while (this.running < this.concurrency && this.pending.length > 0) {
       const id = this.pending.shift()!;
       this.running += 1;
-      void this.runWithRetries(id).finally(() => {
+      const task = this.runWithRetries(id).finally(() => {
         this.running -= 1;
         this.queued.delete(id);
         this.pump();
@@ -79,6 +86,8 @@ export class DocumentPipelineRunner implements OnApplicationBootstrap {
           for (const w of waiters) w();
         }
       });
+      // Keeps a Vercel Function alive until the document is processed; does nothing elsewhere.
+      waitUntil(task);
     }
   }
 

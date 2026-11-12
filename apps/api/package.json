@@ -35,6 +35,7 @@
     "@nestjs/throttler": "^6.0.0",
     "@nestjs/websockets": "^11.0.0",
     "@prisma/client": "^6.19.0",
+    "@vercel/functions": "3.10.5",
     "@vp/rules": "0.1.0",
     "@vp/shared": "0.1.0",
     "argon2": "^0.44.0",

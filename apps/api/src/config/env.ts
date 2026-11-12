@@ -70,6 +70,9 @@ export function validateEnv(raw: Record<string, unknown>): Env {
   if (env.AI_PROVIDER === 'odin' && (!env.ODIN_BASE_URL || !env.ODIN_API_KEY)) {
     throw new Error('Invalid environment: ODIN_BASE_URL and ODIN_API_KEY are required when AI_PROVIDER=odin');
   }
+  if (process.env.VERCEL && env.STORAGE_DRIVER === 'local') {
+    throw new Error('Invalid environment: STORAGE_DRIVER=local cannot work on Vercel (the disk is read-only and temporary). Use STORAGE_DRIVER=s3.');
+  }
   if (!env.API_URL) env.API_URL = `http://localhost:${env.PORT}`;
   if (!env.SHARE_TOKEN_SECRET) env.SHARE_TOKEN_SECRET = env.JWT_SECRET;
   return env;

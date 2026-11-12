@@ -78,7 +78,36 @@ curl https://<api>/api/v1/health
 
 ---
 
-## 5. Ongoing workflow
+## 5. API on Vercel (with the web app on Vercel)
+
+The API also deploys as a single Vercel Function. `apps/api/api/index.js` exports the Nest app's `http.Server` (`src/serverless.ts`), and `apps/api/vercel.json` rewrites every path to it, so the URLs match local development:
+
+- REST: `https://<api>/api/v1/...`, Swagger: `https://<api>/docs`
+- Socket.IO: `https://<api>/intake` over WebSocket (the web client uses the WebSocket transport only)
+
+Setup:
+
+1. Create a Vercel project from this repository with **Root Directory** `apps/api`. Build settings come from `apps/api/vercel.json` (install and build run from the repository root).
+2. Environment variables, as in section 2, plus:
+
+| Variable | Value |
+|---|---|
+| `DATABASE_URL` | Pooled Postgres URL. Supabase: transaction pooler (port 6543) with `?pgbouncer=true&connection_limit=1` |
+| `REDIS_URL` | Hosted Redis (`rediss://` works; the hostname is sent as TLS SNI). Required: it carries live updates between function instances |
+| `STORAGE_DRIVER` | `s3` (required; `local` is refused on Vercel because the disk is read-only and temporary) |
+| `CORS_ORIGIN`, `WEB_URL` | The web app's Vercel URL |
+
+3. Apply migrations from your machine before the first deploy and after each schema change: `DATABASE_URL="<direct or session URL>" npm run db:deploy`.
+4. Deploy, then check `https://<api>/api/v1/health`.
+
+How it behaves on Vercel:
+
+- **Background processing** after upload is kept alive with `waitUntil`, up to the function's `maxDuration` (300 s, the Hobby maximum; raise it in `vercel.json` on Pro). Documents left unfinished are not resumed automatically on Vercel; use Reprocess.
+- **Uploads are limited to 4.5 MB per request** by Vercel. Larger scans fail with `413 FUNCTION_PAYLOAD_TOO_LARGE` until uploads go directly from the browser to storage.
+- **Live updates** reconnect automatically when a function instance recycles.
+- A misconfigured environment answers every request with `503` and the reason is in the function logs.
+
+## 6. Ongoing workflow
 
 | Change | What happens |
 |---|---|

@@ -9,6 +9,7 @@
 
 ## API
 - Prefix `api/v1`, Swagger at `/docs`, health at `GET /api/v1/health`.
+- Entry points: `src/main.ts` (long-running server) and `src/serverless.ts` (Vercel Function, re-exported by `api/index.js`). Both configure the app through `src/app.setup.ts`.
 - Envelope: success `{ success: true, data, meta? }`, error `{ success: false, message, code, errors: [] }` (codes in `ErrorCode`).
 - Auth: `POST /auth/login` → `{ user: UserView, tokens: AuthTokens }`. Bearer access token (15m). `POST /auth/refresh` body `{ refreshToken }` rotates. `GET /auth/me`.
 - Upload: `POST /documents` multipart field `files` (1..30). Returns created `DocumentView[]`; processing is async.

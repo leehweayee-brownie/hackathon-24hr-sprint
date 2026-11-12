@@ -39,7 +39,7 @@ export function BriefStep({ loading, onSubmit }: { loading: boolean; onSubmit: (
 
   const tabs: Array<{ key: Mode; label: string }> = [
     { key: 'paste', label: 'Paste the brief' },
-    { key: 'upload', label: 'Upload RFQ' },
+    { key: 'upload', label: 'Upload Document' },
     { key: 'fields', label: '5 quick fields' },
   ];
 
@@ -101,7 +101,7 @@ export function BriefStep({ loading, onSubmit }: { loading: boolean; onSubmit: (
                 <span className="flex size-11 items-center justify-center rounded-full bg-brand-tint">
                   <Upload className="size-5 text-brand" aria-hidden />
                 </span>
-                <span className="text-sm font-medium leading-5 text-gray-800">Choose the RFQ document</span>
+                <span className="text-sm font-medium leading-5 text-gray-800">Choose the tender document</span>
                 <span className="text-xs leading-4 text-gray-500">PDF, JPG or PNG. The AI reads it; nothing is stored.</span>
               </button>
             )}

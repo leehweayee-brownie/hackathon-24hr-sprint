@@ -24,8 +24,9 @@ export class RealtimeGateway implements OnGatewayConnection, OnModuleInit {
     @Inject(REDIS_SUBSCRIBER) private readonly subscriber: Redis,
   ) {}
 
-  async onModuleInit(): Promise<void> {
-    await this.subscriber.subscribe(REALTIME_CHANNEL);
+  onModuleInit(): void {
+    // Not awaited: a slow or unreachable Redis must not hold up startup. ioredis resubscribes after reconnecting.
+    this.subscriber.subscribe(REALTIME_CHANNEL).catch((err: Error) => this.logger.warn(`Subscribe to live updates failed: ${err.message}`));
     this.subscriber.on('message', (_channel: string, raw: string) => {
       try {
         const msg = JSON.parse(raw) as RealtimeMessage;

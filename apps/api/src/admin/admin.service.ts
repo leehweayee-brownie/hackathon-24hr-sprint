@@ -8,7 +8,7 @@ import { AppException } from '../common/errors/app.exception';
 import type { RequestUser } from '../common/types';
 import { CrossCheckService } from '../cross-check/cross-check.service';
 import { PrismaService } from '../database/prisma.service';
-import { REDIS_CLIENT } from '../database/redis.provider';
+import { REDIS_CLIENT, withTimeout } from '../database/redis.provider';
 import { DocumentPipelineRunner, IN_PIPELINE_STATUSES } from '../documents/pipeline/document-pipeline.runner';
 import { OrganizationsService, SYSTEM_RULES_KEY, sanitizeWeights } from '../organizations/organizations.service';
 import { RemindersService } from '../reminders/reminders.service';
@@ -107,7 +107,7 @@ export class AdminService {
     const count = (statuses: DocumentStatus[]) => byStatus.filter((s) => statuses.includes(s.status as DocumentStatus)).reduce((n, s) => n + s._count._all, 0);
     const inProgress = count(IN_PIPELINE_STATUSES);
     const runner = this.pipeline.stats();
-    const redis = await this.redis.ping().then(() => 'up' as const).catch(() => 'down' as const);
+    const redis = await withTimeout(this.redis.ping(), 2_000, 'Redis ping').then(() => 'up' as const).catch(() => 'down' as const);
     return {
       queue: 'in-process',
       redis,

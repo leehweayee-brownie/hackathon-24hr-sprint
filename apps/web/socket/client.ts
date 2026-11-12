@@ -15,7 +15,8 @@ export function getSocket(): Socket | null {
   socketToken = token;
   socket = io(`${API_URL}/intake`, {
     auth: { token },
-    transports: ['websocket', 'polling'],
+    // WebSocket only: long-polling cannot work when requests land on different serverless instances (Vercel).
+    transports: ['websocket'],
     reconnection: true,
     reconnectionDelayMax: 5000,
   });

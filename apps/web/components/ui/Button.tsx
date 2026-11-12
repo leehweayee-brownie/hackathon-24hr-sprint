@@ -4,7 +4,7 @@ import { Loader2 } from 'lucide-react';
 import { forwardRef, type ButtonHTMLAttributes } from 'react';
 import { cn } from '@/utils/cn';
 
-type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success';
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'success' | 'brand' | 'outline' | 'link';
 type Size = 'sm' | 'md' | 'lg';
 
 export interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -19,6 +19,12 @@ const variants: Record<Variant, string> = {
   ghost: 'bg-transparent text-ink-3 hover:bg-line-soft hover:text-ink',
   danger: 'bg-danger text-white hover:bg-red-700',
   success: 'bg-success text-white hover:bg-green-700',
+  /** Figma "Button / Add vendor" Primary: brand primary-600. */
+  brand: 'bg-brand text-white hover:bg-brand-hover',
+  /** Figma "UI/Button" outline: white, gray-200 border, field shadow. */
+  outline: 'bg-white text-txt-black-700 border border-otl-gray-200 shadow-field hover:bg-zinc-50',
+  /** Figma "UI/Button" Tertiary Colour: text-only blue link. */
+  link: 'bg-transparent text-link hover:underline',
 };
 
 const sizes: Record<Size, string> = {

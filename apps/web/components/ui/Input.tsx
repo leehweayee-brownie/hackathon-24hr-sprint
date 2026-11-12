@@ -21,14 +21,23 @@ export const Textarea = forwardRef<HTMLTextAreaElement, TextareaHTMLAttributes<H
   return <textarea ref={ref} className={cn(base, 'min-h-24 py-2', error && 'border-danger', className)} {...props} />;
 });
 
-export const Select = forwardRef<HTMLSelectElement, SelectHTMLAttributes<HTMLSelectElement> & { error?: string }>(function Select(
-  { className, error, children, ...props },
-  ref,
-) {
-  return (
-    <select ref={ref} className={cn(base, 'h-9', error && 'border-danger', className)} {...props}>
+export const Select = forwardRef<
+  HTMLSelectElement,
+  SelectHTMLAttributes<HTMLSelectElement> & { error?: string; /** Replace the browser arrow with the design's chevron icon. */ chevron?: boolean }
+>(function Select({ className, error, chevron, children, ...props }, ref) {
+  const select = (
+    <select ref={ref} className={cn(base, 'h-9', chevron && 'appearance-none pr-8', error && 'border-danger', className)} {...props}>
       {children}
     </select>
+  );
+  if (!chevron) return select;
+  return (
+    <div className="relative w-full">
+      {select}
+      {/* Figma Icon/outline/chevron-down (16×16), 10px from the right edge */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/figma/login/chevron-down.svg" alt="" width={16} height={16} aria-hidden className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2" />
+    </div>
   );
 });
 

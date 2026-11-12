@@ -39,7 +39,6 @@ function LoginForm() {
   const { user, hydrated } = useAuth();
   const login = useLogin();
   const [role, setRole] = useState<Role>('supplier');
-  const [language, setLanguage] = useState('en');
   const { register, handleSubmit, setValue, formState } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   useEffect(() => {
@@ -62,8 +61,8 @@ function LoginForm() {
         <span className="text-[23.2px] font-black leading-7 text-black">VendVet</span>
       </div>
 
-      {/* Role and language */}
-      <div className="flex w-full items-start justify-between gap-4">
+      {/* Role */}
+      <div className="flex w-full items-start gap-4">
         <div className={cn('w-[180px]', labelClass)}>
           <Field label="Your Role" htmlFor="role">
             <Select id="role" chevron value={role} onChange={(e) => setRole(e.target.value as Role)} className={fieldClass}>
@@ -71,11 +70,6 @@ function LoginForm() {
               <option value="buyer">Buyer</option>
             </Select>
           </Field>
-        </div>
-        <div className="w-[71px]">
-          <Select id="language" aria-label="Language" chevron value={language} onChange={(e) => setLanguage(e.target.value)} className={fieldClass}>
-            <option value="en">EN</option>
-          </Select>
         </div>
       </div>
 

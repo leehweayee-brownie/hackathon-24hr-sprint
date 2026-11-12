@@ -4,7 +4,7 @@ import './globals.css';
 import { Providers } from './providers';
 
 export const metadata: Metadata = {
-  title: { default: 'Vendor Passport', template: '%s · Vendor Passport' },
+  title: { default: 'VendVet', template: '%s · VendVet' },
   description: 'AI-powered supplier onboarding. Upload once, reuse everywhere.',
 };
 

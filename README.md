@@ -590,8 +590,6 @@ PUT /admin/rules *(admin only)*
 
 GET /admin/queue *(admin only)*
 
-GET /admin/ai-usage *(admin only)*
-
 ---
 
 # Socket.IO Events

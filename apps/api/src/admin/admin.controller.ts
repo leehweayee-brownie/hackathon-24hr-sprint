@@ -50,11 +50,6 @@ export class AdminController {
     return this.admin.queue_();
   }
 
-  @Get('ai-usage')
-  aiUsage() {
-    return this.admin.aiUsage();
-  }
-
   @Post('reminders/run')
   runReminders() {
     return this.admin.runReminders();

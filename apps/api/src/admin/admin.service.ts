@@ -5,7 +5,6 @@ import { DOC_TYPE_DEFINITIONS, DocumentStatus } from '@vp/shared';
 import type { Queue } from 'bullmq';
 import type { Redis } from 'ioredis';
 import { AuditService } from '../audit/audit.service';
-import { AppConfigService } from '../config/config.service';
 import { Paginated, PaginationQuery } from '../common/dto/pagination';
 import { AppException } from '../common/errors/app.exception';
 import type { RequestUser } from '../common/types';
@@ -25,7 +24,6 @@ export class AdminService {
     private readonly crossCheck: CrossCheckService,
     private readonly reminders: RemindersService,
     private readonly audit: AuditService,
-    private readonly config: AppConfigService,
     @InjectQueue(DOCUMENTS_QUEUE) private readonly queue: Queue,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
@@ -117,40 +115,6 @@ export class AdminService {
       inProgress,
       byStatus: Object.fromEntries(byStatus.map((s) => [s.status, s._count._all])),
       failedDocuments: failedDocuments.map((d) => ({ id: d.id, fileName: d.fileName, supplierId: d.supplierId, supplierName: d.supplier.name, error: d.error, attempts: d.attempts, updatedAt: d.updatedAt.toISOString() })),
-    };
-  }
-
-  async aiUsage() {
-    const [totals, cachedCalls, perDay, perSupplier, perModel] = await Promise.all([
-      this.prisma.aiUsage.aggregate({ _count: { _all: true }, _sum: { inputTokens: true, outputTokens: true, costUsd: true, durationMs: true } }),
-      this.prisma.aiUsage.count({ where: { cached: true } }),
-      this.prisma.$queryRaw<Array<{ day: Date; calls: bigint; input_tokens: bigint; output_tokens: bigint; cost_usd: Prisma.Decimal }>>`
-        SELECT date_trunc('day', created_at) AS day, COUNT(*) AS calls, SUM(input_tokens) AS input_tokens, SUM(output_tokens) AS output_tokens, SUM(cost_usd) AS cost_usd
-        FROM ai_usage GROUP BY 1 ORDER BY 1 DESC LIMIT 30`,
-      this.prisma.aiUsage.groupBy({ by: ['supplierId'], _count: { _all: true }, _sum: { costUsd: true, inputTokens: true, outputTokens: true } }),
-      this.prisma.aiUsage.groupBy({ by: ['model', 'cached'], _count: { _all: true }, _sum: { costUsd: true } }),
-    ]);
-    const supplierIds = perSupplier.map((s) => s.supplierId).filter((x): x is string => !!x);
-    const suppliers = await this.prisma.organization.findMany({ where: { id: { in: supplierIds } }, select: { id: true, name: true } });
-    const names = new Map(suppliers.map((s) => [s.id, s.name]));
-    const checks = await this.prisma.vendorCheck.count();
-    const totalCost = Number(totals._sum.costUsd ?? 0);
-    const byDay = perDay.map((d) => ({ day: d.day.toISOString().slice(0, 10), calls: Number(d.calls), inputTokens: Number(d.input_tokens), outputTokens: Number(d.output_tokens), costUsd: Number(d.cost_usd) }));
-    const bySupplier = perSupplier.map((s) => ({ supplierId: s.supplierId, supplierName: s.supplierId ? names.get(s.supplierId) ?? 'Unknown' : 'Unknown', calls: s._count._all, costUsd: Number(s._sum.costUsd ?? 0), inputTokens: s._sum.inputTokens ?? 0, outputTokens: s._sum.outputTokens ?? 0 }));
-    return {
-      model: this.config.get('AI_PROVIDER') === 'anthropic' ? this.config.get('AI_MODEL') : 'mock (recorded extractions)',
-      totals: {
-        calls: totals._count._all,
-        cached: cachedCalls,
-        inputTokens: totals._sum.inputTokens ?? 0,
-        outputTokens: totals._sum.outputTokens ?? 0,
-        costUsd: totalCost,
-        avgDurationMs: totals._count._all ? Math.round((totals._sum.durationMs ?? 0) / totals._count._all) : 0,
-        costPerCheckUsd: checks ? totalCost / checks : 0,
-      },
-      byDay,
-      bySupplier,
-      byModel: perModel.map((m) => ({ model: m.model, cached: m.cached, calls: m._count._all, costUsd: Number(m._sum.costUsd ?? 0) })),
     };
   }
 

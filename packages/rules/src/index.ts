@@ -9,6 +9,7 @@ export * from './dates';
 export * from './cross-check';
 export * from './trust-score';
 export * from './timeline';
+export * from './match';
 export * from './types';
 
 export interface EvaluationResult extends TrustScoreResult {

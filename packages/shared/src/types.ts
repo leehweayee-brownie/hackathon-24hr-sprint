@@ -215,6 +215,81 @@ export interface VendorCheckView {
   timeline?: TimelineEntry[];
   documents?: DocumentView[];
   lowConfidenceFields?: Array<DocumentFieldView & { documentId: string; docType: DocType | null }>;
+  /** Post-job rating, once the buyer has rated an approved check. */
+  rating?: VendorRatingView | null;
+}
+
+export interface VendorRatingView {
+  score: number;
+  comment: string | null;
+  ratedByName: string | null;
+  createdAt: string;
+}
+
+/* ---------------------------------------------------------------- Vendor Match */
+
+/** Structured tender requirements. The AI drafts them from the brief; the buyer confirms or edits before matching. */
+export interface TenderRequirements {
+  title: string;
+  /** Work category, e.g. "Building works". */
+  scope: string;
+  contractValue: number | null;
+  location: string | null;
+  /** ISO dates (YYYY-MM-DD). The contract period every document must cover. */
+  startDate: string | null;
+  endDate: string | null;
+  /** Lowest CIDB grade allowed. Derived from the contract value when the brief does not say. */
+  minCidbGrade: string | null;
+  /** Minimum public liability cover in MYR. */
+  minLiabilityCoverage: number | null;
+  requiredDocTypes: DocType[];
+  /** Other must-haves the rules engine does not check (shown, not filtered). */
+  notes: string[];
+}
+
+export interface BriefParseResult {
+  requirements: TenderRequirements;
+  /** Who drafted the requirements: the configured AI provider, or the built-in parser when AI is unavailable. */
+  source: 'ai' | 'parser';
+  /** Short notes on what was assumed or derived, e.g. "Grade G6 derived from RM7,000,000". */
+  assumptions: string[];
+}
+
+export type MatchFit = 'qualified' | 'conditional' | 'excluded';
+
+export type MatchGapKind = 'grade_below' | 'missing_document' | 'expired' | 'expires_before_end' | 'cover_below_minimum' | 'identity_mismatch';
+
+export interface MatchGap {
+  kind: MatchGapKind;
+  docType: DocType | null;
+  message: string;
+  /** True when the supplier can close it by sending a document (shows "Request document"). */
+  requestable: boolean;
+}
+
+export interface VendorMatch {
+  supplierId: string;
+  supplierName: string;
+  fit: MatchFit;
+  /** One-line verdict, e.g. "G7, insurance valid for the whole contract, rated 4.6 from 3 past jobs." */
+  summary: string;
+  strengths: string[];
+  gaps: MatchGap[];
+  trustScore: number | null;
+  cidbGrade: string | null;
+  liabilityCover: number | null;
+  rating: { average: number | null; count: number };
+  pastJobs: number;
+  location: string | null;
+  /** Open vendor check this buyer already has with the supplier, if any. */
+  openCheckId: string | null;
+}
+
+export interface MatchResult {
+  requirements: TenderRequirements;
+  matches: VendorMatch[];
+  /** Number of suppliers with a passport that were considered. */
+  poolSize: number;
 }
 
 export interface NotificationView {

@@ -83,14 +83,6 @@ export interface QueueHealthView {
   redis: 'up' | 'down';
 }
 
-export interface AiUsageView {
-  totals: { calls: number; inputTokens: number; outputTokens: number; costUsd: number; cached: number };
-  byDay: Array<{ day: string; calls: number; costUsd: number }>;
-  byCheck?: Array<{ vendorCheckId: string; supplierName: string; costUsd: number; calls: number }>;
-  bySupplier?: Array<{ supplierId: string; supplierName: string; costUsd: number; calls: number }>;
-  model?: string;
-}
-
 export interface UploadProgress {
   localId: string;
   fileName: string;

@@ -1,4 +1,4 @@
-import type { AdminDocTypeView, AdminOrganizationView, AdminRulesView, AiUsageView, QueueHealthView } from '@/types';
+import type { AdminDocTypeView, AdminOrganizationView, AdminRulesView, QueueHealthView } from '@/types';
 import { del, get, patch, post, put } from './http';
 
 export const adminService = {
@@ -9,6 +9,5 @@ export const adminService = {
   rules: () => get<AdminRulesView>('/admin/rules'),
   saveRules: (input: AdminRulesView) => put<AdminRulesView>('/admin/rules', input),
   queue: () => get<QueueHealthView>('/admin/queue'),
-  aiUsage: () => get<AiUsageView>('/admin/ai-usage'),
   runReminders: () => post<{ sent: number }>('/admin/reminders/run'),
 };

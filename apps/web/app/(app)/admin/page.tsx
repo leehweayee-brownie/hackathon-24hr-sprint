@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import { PageHeader } from '@/components/ui/PageHeader';
-import { AiUsageTab } from '@/features/admin/AiUsageTab';
 import { DocTypesTab } from '@/features/admin/DocTypesTab';
 import { OrganizationsTab } from '@/features/admin/OrganizationsTab';
 import { QueueTab } from '@/features/admin/QueueTab';
@@ -14,7 +13,6 @@ const TABS = [
   { key: 'types', label: 'Document types', component: DocTypesTab },
   { key: 'rules', label: 'Rule weights', component: RulesTab },
   { key: 'queue', label: 'Queue health', component: QueueTab },
-  { key: 'ai', label: 'AI usage', component: AiUsageTab },
 ] as const;
 
 export default function AdminPage() {

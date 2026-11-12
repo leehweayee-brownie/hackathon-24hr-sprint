@@ -22,6 +22,9 @@ interface UiState {
   /** Mouse cursor theme. Remembered per browser and applied before first paint by the root layout script. */
   cursorTheme: CursorThemeId;
   setCursorTheme: (theme: CursorThemeId) => void;
+  /** Role picked on the login or sign-up form; drives the "Vendor / Buyer onboarding" label beside it. */
+  authRole: 'vendor' | 'buyer';
+  setAuthRole: (role: 'vendor' | 'buyer') => void;
 }
 
 export const readCursorTheme = (): CursorThemeId => {
@@ -50,6 +53,8 @@ export const useUiStore = create<UiState>()((set) => ({
     setTimeout(() => set((s) => ({ toasts: s.toasts.filter((x) => x.id !== id) })), 5000);
   },
   dismiss: (id) => set((s) => ({ toasts: s.toasts.filter((x) => x.id !== id) })),
+  authRole: 'vendor',
+  setAuthRole: (authRole) => set({ authRole }),
   sidebarOpen: false,
   setSidebarOpen: (sidebarOpen) => set({ sidebarOpen }),
   sidebarCollapsed: false,

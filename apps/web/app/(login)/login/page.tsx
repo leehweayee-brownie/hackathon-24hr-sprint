@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Field, Input, Select } from '@/components/ui/Input';
 import { useAuth, useLogin } from '@/hooks/useAuth';
 import { errorMessage } from '@/services/http';
-import { toast } from '@/store/ui';
+import { toast, useUiStore } from '@/store/ui';
 import { cn } from '@/utils/cn';
 import { homeForUser } from '@/utils/roles';
 
@@ -39,6 +39,9 @@ function LoginForm() {
   const { user, hydrated } = useAuth();
   const login = useLogin();
   const [role, setRole] = useState<Role>('supplier');
+  const setAuthRole = useUiStore((s) => s.setAuthRole);
+  // The panel beside the form says "Vendor onboarding" or "Buyer onboarding" to match.
+  useEffect(() => setAuthRole(role === 'buyer' ? 'buyer' : 'vendor'), [role, setAuthRole]);
   const { register, handleSubmit, setValue, formState } = useForm<FormValues>({ resolver: zodResolver(schema) });
 
   useEffect(() => {

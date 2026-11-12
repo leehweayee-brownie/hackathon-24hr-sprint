@@ -1,5 +1,6 @@
 /* eslint-disable @next/next/no-img-element -- static Figma assets at fixed design sizes */
 import type { ReactNode } from 'react';
+import { OnboardingLabel } from './OnboardingLabel';
 
 /**
  * Figma "Login" frame (13:1525), 1440 × 1024: the login card on a white left half,
@@ -28,14 +29,7 @@ export default function LoginLayout({ children }: { children: ReactNode }) {
         <img src="/figma/login/bottom-triangles.svg" alt="" width={200} height={200} className="absolute -bottom-[3px] left-0 [@media(max-height:700px)]:hidden" />
 
         <div className="absolute left-[91px] top-[157px] flex w-[306px] flex-col items-start gap-[14px]">
-          <p className="text-[12px] font-medium uppercase leading-[18px] tracking-[0.4px] text-brand">Vendor onboarding</p>
-          <h2 className="text-[32px] font-semibold leading-10 text-black">Upload once, reuse everywhere.</h2>
-          <div className="text-base leading-6 text-black">
-            <p>Drop a vendor&apos;s documents once. Every certificate is sorted,</p>
-            <p>read and cross-checked against the others, so buyers get a</p>
-            <p>trust score with reasons and vendors get a passport they can</p>
-            <p>share by link.</p>
-          </div>
+          <OnboardingLabel />
         </div>
       </aside>
     </main>

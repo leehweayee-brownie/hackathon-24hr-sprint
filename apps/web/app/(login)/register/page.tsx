@@ -4,7 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { useState, type ReactNode } from 'react';
+import { useEffect, useState, type ReactNode } from 'react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { authService } from '@/services/auth';
@@ -34,6 +34,9 @@ export default function RegisterPage() {
     defaultValues: { organizationType: 'SUPPLIER' },
   });
   const type = watch('organizationType');
+  const setAuthRole = useUiStore((s) => s.setAuthRole);
+  // The panel beside the form says "Vendor onboarding" or "Buyer onboarding" to match.
+  useEffect(() => setAuthRole(type === 'BUYER' ? 'buyer' : 'vendor'), [type, setAuthRole]);
 
   const onSubmit = async (values: FormValues) => {
     setError(null);

@@ -113,7 +113,9 @@ export class ExtractionService {
   }
 
   private get modelName(): string {
-    return this.provider.name === 'mock' ? 'mock' : this.config.get('AI_MODEL');
+    if (this.provider.name === 'mock') return 'mock';
+    if (this.provider.name === 'odin') return `odin/${this.config.get('ODIN_MODEL')}`;
+    return this.config.get('AI_MODEL');
   }
 }
 

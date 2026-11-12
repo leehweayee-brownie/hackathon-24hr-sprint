@@ -7,8 +7,18 @@ import { ExtractionService } from './extraction.service';
 import { PagePrepService } from './page-prep.service';
 import { AnthropicExtractionProvider } from './providers/anthropic.provider';
 import { MockExtractionProvider } from './providers/mock.provider';
+import { OdinExtractionProvider } from './providers/odin.provider';
 
 export function createExtractionProvider(config: AppConfigService): ExtractionProvider {
+  if (config.get('AI_PROVIDER') === 'odin') {
+    return new OdinExtractionProvider({
+      baseUrl: config.get('ODIN_BASE_URL') as string,
+      apiKey: config.get('ODIN_API_KEY') as string,
+      model: config.get('ODIN_MODEL'),
+      timeoutMs: config.get('ODIN_TIMEOUT_MS'),
+      principalId: config.get('ODIN_PRINCIPAL_ID'),
+    });
+  }
   if (config.get('AI_PROVIDER') === 'anthropic') {
     return new AnthropicExtractionProvider(config.get('ANTHROPIC_API_KEY') as string, config.get('AI_MODEL'));
   }

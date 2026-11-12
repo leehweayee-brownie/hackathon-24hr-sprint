@@ -29,6 +29,7 @@
 
 ## AI
 - `ExtractionProvider` interface: `classify(input)` and `extract(input, docType)` (types in `@vp/shared`).
+- `AI_PROVIDER=odin` (`providers/odin.provider.ts`): one short GT-Odin session per call, document sent as `forwardedProps.attachments` (PDF whole, scans as JPEG pages, max 10), reply streamed over SSE (`?protocol=ag-ui`) because Odin's gateway cuts blocking turns at 30 s, one JSON retry in the same session, session ended in `finally`. No token counts are reported, so usage rows record zero tokens and model `odin/<ODIN_MODEL>`.
 - `AI_PROVIDER=mock` replays `fixtures/extractions/<file name>.json` (`ExtractionRecording`), matched by file name (case-insensitive). Unknown files → `OTHER`, confidence 0.5.
 - Date values in recordings may be `{{today+23d}}` / `{{today-10d}}`; the mock provider and the seed resolve them to ISO dates at run time.
 - Extraction is cached by `sha256 + docType` in the `ai_usage` / recorded results (same file is never read twice).

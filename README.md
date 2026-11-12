@@ -185,7 +185,7 @@ Role-gated `/admin` screen.
 - Prisma ORM
 - BullMQ (document processing jobs)
 - Socket.IO Gateway (processing progress)
-- Vision AI model through the Anthropic API (classification and extraction)
+- Vision AI model through GT-Odin or the Anthropic API (classification and extraction)
 - Passport JWT
 - Argon2
 - Swagger
@@ -746,6 +746,7 @@ npx playwright install chromium && npm run test:e2e -w @vp/web
 ## Implementation notes
 
 - Set `AI_PROVIDER=mock` to run the whole app offline with recorded extractions for the fixture documents.
+- Set `AI_PROVIDER=odin` with `ODIN_BASE_URL`, `ODIN_API_KEY` and `ODIN_MODEL` to read documents through GT-Odin, Gamuda's internal agent platform. Use a service account issued for Vendor Passport and a model that reads images and PDFs.
 - Uploaded files are stored in the repo-root `uploads/` folder (`STORAGE_DRIVER=local`). Set `STORAGE_DRIVER=s3` to use MinIO or S3 instead.
 - `AI_MODEL` and `CONFIDENCE_THRESHOLD` are set in `apps/api/.env`.
 - If ports are taken locally, start the containers with `POSTGRES_PORT=5442 docker compose up -d` and update `DATABASE_URL` in `apps/api/.env`.

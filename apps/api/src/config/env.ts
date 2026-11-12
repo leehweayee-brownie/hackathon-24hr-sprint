@@ -33,9 +33,14 @@ export const envSchema = z.object({
   REFRESH_TOKEN_TTL_DAYS: z.coerce.number().default(7),
   SHARE_TOKEN_SECRET: z.string().min(16).optional(),
 
-  AI_PROVIDER: z.enum(['anthropic', 'mock']).default('mock'),
+  AI_PROVIDER: z.enum(['anthropic', 'odin', 'mock']).default('mock'),
   ANTHROPIC_API_KEY: z.string().optional(),
   AI_MODEL: z.string().default('claude-sonnet-5-5'),
+  ODIN_BASE_URL: z.string().url().optional(),
+  ODIN_API_KEY: z.string().optional(),
+  ODIN_MODEL: z.string().default('gemini-3.5-flash'),
+  ODIN_TIMEOUT_MS: z.coerce.number().default(180_000),
+  ODIN_PRINCIPAL_ID: z.string().default('system:vendor-passport'),
   AI_MAX_PAGES: z.coerce.number().default(20),
   CONFIDENCE_THRESHOLD: z.coerce.number().min(0).max(1).default(0.85),
   EXPIRY_WARNING_DAYS: z.coerce.number().default(30),
@@ -60,6 +65,9 @@ export function validateEnv(raw: Record<string, unknown>): Env {
   const env = parsed.data;
   if (env.AI_PROVIDER === 'anthropic' && !env.ANTHROPIC_API_KEY) {
     throw new Error('Invalid environment: ANTHROPIC_API_KEY is required when AI_PROVIDER=anthropic');
+  }
+  if (env.AI_PROVIDER === 'odin' && (!env.ODIN_BASE_URL || !env.ODIN_API_KEY)) {
+    throw new Error('Invalid environment: ODIN_BASE_URL and ODIN_API_KEY are required when AI_PROVIDER=odin');
   }
   if (!env.API_URL) env.API_URL = `http://localhost:${env.PORT}`;
   if (!env.SHARE_TOKEN_SECRET) env.SHARE_TOKEN_SECRET = env.JWT_SECRET;

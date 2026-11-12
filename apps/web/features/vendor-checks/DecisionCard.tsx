@@ -14,6 +14,7 @@ import { cn } from '@/utils/cn';
 import { formatDate, formatDateTime, formatMoney } from '@/utils/format';
 import { isApprover } from '@/utils/roles';
 import { CheckStatusBadge, shortCompanyName } from './CheckTableParts';
+import { RatingPanel } from './RatingPanel';
 
 type Action = 'approve' | 'reject' | 'request-info';
 
@@ -164,6 +165,8 @@ export function DecisionCard({ check }: { check: VendorCheckView }) {
           </div>
         </div>
       )}
+
+      {check.status === VendorCheckStatus.APPROVED && user?.organizationId === check.buyerId ? <RatingPanel check={check} /> : null}
 
       <Modal
         open={!!action}

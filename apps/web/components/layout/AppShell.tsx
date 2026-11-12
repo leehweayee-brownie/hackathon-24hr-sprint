@@ -1,6 +1,6 @@
 'use client';
 
-import { Bell, ChevronDown, CircleHelp, ClipboardCheck, FileText, LayoutDashboard, LogOut, Menu, PanelRightClose, PanelRightOpen, Settings2, User, X } from 'lucide-react';
+import { Bell, ChevronDown, CircleHelp, ClipboardCheck, FileText, LayoutDashboard, LogOut, Menu, PanelRightClose, PanelRightOpen, Settings2, Sparkles, User, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type ComponentType, type ReactNode, type SVGProps } from 'react';
@@ -41,6 +41,7 @@ const NAV: Record<Area, NavSection[]> = {
       title: 'Overview',
       items: [
         { href: '/buyer', label: 'Dashboard', icon: LayoutDashboard, exact: true },
+        { href: '/buyer/match', label: 'Vendor Match', icon: Sparkles },
         { href: '/buyer/checks', label: 'Vendor checks', icon: ClipboardCheck },
       ],
     },

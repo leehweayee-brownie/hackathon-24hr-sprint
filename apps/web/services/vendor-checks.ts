@@ -19,6 +19,7 @@ export const vendorChecksService = {
   requestInfo: (id: string, note: string) => post<VendorCheckView>(`/vendor-checks/${id}/request-info`, { note }),
   approve: (id: string, note?: string) => post<VendorCheckView>(`/vendor-checks/${id}/approve`, { note }),
   reject: (id: string, note: string) => post<VendorCheckView>(`/vendor-checks/${id}/reject`, { note }),
+  rate: (id: string, score: number, comment?: string) => post<VendorCheckView>(`/vendor-checks/${id}/rating`, { score, comment }),
   suppliers: (q?: string) => get<SupplierSummary[]>('/suppliers', q ? { q } : undefined),
   audit: (entity: string, entityId: string) => get<AuditLogView[]>('/audit', { entity, entityId }),
 };

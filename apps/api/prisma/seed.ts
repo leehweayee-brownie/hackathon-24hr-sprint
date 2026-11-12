@@ -64,6 +64,12 @@ let s3: S3Client | null = null;
 let sseDisabled = false;
 
 async function putObject(key: string, body: Buffer, contentType: string): Promise<void> {
+  if (env('STORAGE_DRIVER', 's3') === 'blob') {
+    // Private Vercel Blob store, same key as the API uses. Needs BLOB_READ_WRITE_TOKEN when run from a laptop.
+    const { put } = await import('@vercel/blob');
+    await put(key, body, { access: 'private', contentType, addRandomSuffix: false, allowOverwrite: true, token: env('BLOB_READ_WRITE_TOKEN') || undefined });
+    return;
+  }
   if (env('STORAGE_DRIVER', 's3') === 's3') {
     s3 ??= new S3Client({
       region: env('S3_REGION', 'us-east-1'),

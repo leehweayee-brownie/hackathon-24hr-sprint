@@ -12,7 +12,7 @@ const MIME_BY_EXT: Record<string, string> = {
   heic: 'image/heic',
 };
 
-/** Serves locally stored files through short-lived signed links (STORAGE_DRIVER=local only). */
+/** Serves stored files through short-lived signed links (STORAGE_DRIVER=local or blob). Streams, so size limits do not apply. */
 @ApiExcludeController()
 @Controller('files')
 export class FilesController {
@@ -21,13 +21,16 @@ export class FilesController {
   @Public()
   @Get(':token')
   async serve(@Param('token') token: string, @Res() res: Response): Promise<void> {
-    const payload = this.storage.verifyLocalToken(token);
+    const payload = this.storage.verifyFileToken(token);
     if (!payload) throw new NotFoundException('File link is invalid or has expired');
-    const body = await this.storage.get(payload.key);
+    const file = await this.storage.getStream(payload.key).catch(() => null);
+    if (!file) throw new NotFoundException('File not found');
     const ext = (payload.name ?? payload.key).split('.').pop()?.toLowerCase() ?? '';
-    res.setHeader('Content-Type', MIME_BY_EXT[ext] ?? 'application/octet-stream');
+    res.setHeader('Content-Type', MIME_BY_EXT[ext] ?? file.contentType ?? 'application/octet-stream');
     res.setHeader('Content-Disposition', `inline; filename="${(payload.name ?? 'file').replace(/"/g, '')}"`);
     res.setHeader('Cache-Control', 'private, max-age=60');
-    res.send(body);
+    if (file.size !== undefined) res.setHeader('Content-Length', String(file.size));
+    file.stream.on('error', () => res.destroy());
+    file.stream.pipe(res);
   }
 }

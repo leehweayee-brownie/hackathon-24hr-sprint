@@ -1,7 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { AppConfigService } from '../config/config.service';
-import { LocalStorageAdapter } from './adapters/local.adapter';
-import type { PutOptions, StorageAdapter } from './adapters/storage.adapter';
+import type { FileStream, PutOptions, StorageAdapter, StorageKind } from './adapters/storage.adapter';
 import { createStorageAdapter } from './storage.factory';
 
 @Injectable()
@@ -26,12 +25,13 @@ export class StorageService {
         PORT: String(config.get('PORT')),
         SHARE_TOKEN_SECRET: config.get('SHARE_TOKEN_SECRET'),
         JWT_SECRET: config.get('JWT_SECRET'),
+        BLOB_READ_WRITE_TOKEN: config.get('BLOB_READ_WRITE_TOKEN'),
       },
       (msg) => this.logger.warn(msg),
     );
   }
 
-  get kind(): 's3' | 'local' {
+  get kind(): StorageKind {
     return this.adapter.kind;
   }
 
@@ -41,6 +41,14 @@ export class StorageService {
 
   get(key: string): Promise<Buffer> {
     return this.adapter.get(key);
+  }
+
+  /** Streams when the driver supports it, otherwise wraps the buffered read. */
+  async getStream(key: string): Promise<FileStream> {
+    if (this.adapter.getStream) return this.adapter.getStream(key);
+    const { Readable } = await import('node:stream');
+    const body = await this.adapter.get(key);
+    return { stream: Readable.from(body), size: body.length };
   }
 
   delete(key: string): Promise<void> {
@@ -55,9 +63,8 @@ export class StorageService {
     return this.adapter.healthCheck();
   }
 
-  /** Only meaningful for the local driver: validates a signed file token. */
-  verifyLocalToken(token: string): { key: string; name?: string } | null {
-    if (!(this.adapter instanceof LocalStorageAdapter)) return null;
-    return this.adapter.verify(token);
+  /** Validates a signed `/files/:token` link (local and blob drivers). Null for drivers with their own URLs (s3). */
+  verifyFileToken(token: string): { key: string; name?: string } | null {
+    return this.adapter.verifyLink ? this.adapter.verifyLink(token) : null;
   }
 }

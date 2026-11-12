@@ -1,3 +1,4 @@
+import { BlobStorageAdapter } from './adapters/blob.adapter';
 import { LocalStorageAdapter } from './adapters/local.adapter';
 import { S3StorageAdapter } from './adapters/s3.adapter';
 import type { StorageAdapter } from './adapters/storage.adapter';
@@ -24,10 +25,13 @@ export function createStorageAdapter(env: StorageEnv = process.env, warn: (msg: 
     );
   }
   const port = env.PORT ?? '4000';
-  return new LocalStorageAdapter({
-    dir: env.LOCAL_STORAGE_DIR ?? './uploads',
+  const links = {
     apiUrl: env.API_URL ?? `http://localhost:${port}`,
     apiPrefix: env.API_PREFIX ?? 'api/v1',
     secret: env.SHARE_TOKEN_SECRET ?? env.JWT_SECRET ?? 'dev-secret',
-  });
+  };
+  if (driver === 'blob') {
+    return new BlobStorageAdapter({ ...links, token: env.BLOB_READ_WRITE_TOKEN || undefined });
+  }
+  return new LocalStorageAdapter({ ...links, dir: env.LOCAL_STORAGE_DIR ?? './uploads' });
 }

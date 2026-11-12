@@ -746,7 +746,7 @@ npx playwright install chromium && npm run test:e2e -w @vp/web
 
 - Set `AI_PROVIDER=mock` to run the whole app offline with recorded extractions for the fixture documents.
 - Set `AI_PROVIDER=odin` with `ODIN_BASE_URL`, `ODIN_API_KEY` and `ODIN_MODEL` to read documents through GT-Odin, Gamuda's internal agent platform. Use a service account issued for Vendor Passport and a model that reads images and PDFs.
-- Uploaded files are stored in `apps/api/uploads/` (`STORAGE_DRIVER=local`). Set `STORAGE_DRIVER=s3` to use MinIO or S3 instead.
+- Uploaded files are stored in `apps/api/uploads/` (`STORAGE_DRIVER=local`). Set `STORAGE_DRIVER=blob` for a private Vercel Blob store (used on Vercel) or `STORAGE_DRIVER=s3` for MinIO or S3.
 - `AI_MODEL` and `CONFIDENCE_THRESHOLD` are set in `apps/api/.env`.
 - If ports are taken locally, start the containers with `POSTGRES_PORT=5442 docker compose up -d` and update `DATABASE_URL` in `apps/api/.env`.
 - Full stack in containers: `docker compose --profile app up --build` (web on :8888, API on :4000).

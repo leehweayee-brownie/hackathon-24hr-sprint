@@ -26,7 +26,7 @@
 ## Storage
 - Object key: `suppliers/<supplierId>/documents/<documentId>/<original file name>`.
 - Local development: `STORAGE_DRIVER=local`, files under `apps/api/uploads/` (`LOCAL_STORAGE_DIR=./uploads`, relative to `apps/api`), served through short-lived signed links at `/api/v1/files/:token`. Git-ignored.
-- Deployed: `STORAGE_DRIVER=s3` (S3, R2 or MinIO, bucket `vendor-passport`, SSE AES256).
+- Deployed: `STORAGE_DRIVER=blob` (private Vercel Blob store; files streamed through the signed `/files/:token` route) or `STORAGE_DRIVER=s3` (S3, R2 or MinIO, bucket `vendor-passport`, SSE AES256).
 
 ## AI
 - `ExtractionProvider` interface: `classify(input)` and `extract(input, docType)` (types in `@vp/shared`).

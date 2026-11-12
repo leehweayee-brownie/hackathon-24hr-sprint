@@ -17,7 +17,7 @@ export const envSchema = z.object({
   DATABASE_URL: z.string().min(1),
   REDIS_URL: z.string().default('redis://localhost:6379'),
 
-  STORAGE_DRIVER: z.enum(['s3', 'local']).default('local'),
+  STORAGE_DRIVER: z.enum(['s3', 'local', 'blob']).default('local'),
   S3_ENDPOINT: z.string().optional(),
   S3_REGION: z.string().default('us-east-1'),
   S3_BUCKET: z.string().default('vendor-passport'),
@@ -27,6 +27,8 @@ export const envSchema = z.object({
   S3_SSE: z.string().optional(),
   SIGNED_URL_TTL_SECONDS: z.coerce.number().default(300),
   LOCAL_STORAGE_DIR: z.string().default('./uploads'),
+  /** Vercel Blob. Optional on Vercel when the store is connected to the project (OIDC + BLOB_STORE_ID). */
+  BLOB_READ_WRITE_TOKEN: z.string().optional(),
 
   JWT_SECRET: z.string().min(16),
   JWT_EXPIRES_IN: z.string().default('15m'),
@@ -70,8 +72,11 @@ export function validateEnv(raw: Record<string, unknown>): Env {
   if (env.AI_PROVIDER === 'odin' && (!env.ODIN_BASE_URL || !env.ODIN_API_KEY)) {
     throw new Error('Invalid environment: ODIN_BASE_URL and ODIN_API_KEY are required when AI_PROVIDER=odin');
   }
+  if (env.STORAGE_DRIVER === 'blob' && !env.BLOB_READ_WRITE_TOKEN && !(process.env.VERCEL_OIDC_TOKEN || process.env.VERCEL) ) {
+    throw new Error('Invalid environment: STORAGE_DRIVER=blob needs BLOB_READ_WRITE_TOKEN outside Vercel (on Vercel, connect the Blob store to the project).');
+  }
   if (process.env.VERCEL && env.STORAGE_DRIVER === 'local') {
-    throw new Error('Invalid environment: STORAGE_DRIVER=local cannot work on Vercel (the disk is read-only and temporary). Use STORAGE_DRIVER=s3.');
+    throw new Error('Invalid environment: STORAGE_DRIVER=local cannot work on Vercel (the disk is read-only and temporary). Use STORAGE_DRIVER=blob (Vercel Blob) or s3.');
   }
   if (!env.API_URL) env.API_URL = `http://localhost:${env.PORT}`;
   if (!env.SHARE_TOKEN_SECRET) env.SHARE_TOKEN_SECRET = env.JWT_SECRET;

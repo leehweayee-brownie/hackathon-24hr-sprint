@@ -94,7 +94,8 @@ Setup:
 |---|---|
 | `DATABASE_URL` | Pooled Postgres URL. Supabase: transaction pooler (port 6543) with `?pgbouncer=true&connection_limit=1` |
 | `REDIS_URL` | Hosted Redis (`rediss://` works; the hostname is sent as TLS SNI). Required: it carries live updates between function instances |
-| `STORAGE_DRIVER` | `s3` (required; `local` is refused on Vercel because the disk is read-only and temporary) |
+| `STORAGE_DRIVER` | `blob` (Vercel Blob, recommended) or `s3`. `local` is refused on Vercel because the disk is read-only and temporary |
+| Blob store | Create a **private** store and connect it to the API project: `vercel blob create-store vendor-passport-docs --access private`, then connect it in Storage. Connected projects authenticate with OIDC (`BLOB_STORE_ID`); no token needed. Seeding from a laptop needs the store's `BLOB_READ_WRITE_TOKEN` |
 | `CORS_ORIGIN`, `WEB_URL` | The web app's Vercel URL |
 
 3. Apply migrations from your machine before the first deploy and after each schema change: `DATABASE_URL="<direct or session URL>" npm run db:deploy`.

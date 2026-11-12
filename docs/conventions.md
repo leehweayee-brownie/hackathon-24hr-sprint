@@ -24,7 +24,8 @@
 
 ## Storage
 - Object key: `suppliers/<supplierId>/documents/<documentId>/<original file name>`.
-- `STORAGE_DRIVER=s3` (MinIO locally, bucket `vendor-passport`, SSE AES256) or `local` (`LOCAL_STORAGE_DIR`).
+- Local development: `STORAGE_DRIVER=local`, files under the repo-root `uploads/` folder (`LOCAL_STORAGE_DIR=../../uploads`, relative to `apps/api`), served through short-lived signed links at `/api/v1/files/:token`. Git-ignored.
+- Deployed: `STORAGE_DRIVER=s3` (S3, R2 or MinIO, bucket `vendor-passport`, SSE AES256).
 
 ## AI
 - `ExtractionProvider` interface: `classify(input)` and `extract(input, docType)` (types in `@vp/shared`).

@@ -201,7 +201,7 @@ PostgreSQL
 
 Redis (job queue, cache)
 
-S3-compatible object storage (MinIO locally), server-side encryption
+S3-compatible object storage with server-side encryption in deployed environments; a local `uploads/` folder in development
 
 ---
 
@@ -703,7 +703,7 @@ Frontend
 Requires Node 22+ and Docker.
 
 ```bash
-# 1. Infrastructure: PostgreSQL (:5432), Redis (:6379), MinIO (:9000)
+# 1. Infrastructure: PostgreSQL (:5432), Redis (:6379), MinIO (:9000, only used with STORAGE_DRIVER=s3)
 docker compose up -d
 
 # 2. Install (npm workspaces) and build shared packages
@@ -749,6 +749,7 @@ npx playwright install chromium && npm run test:e2e -w @vp/web
 ## Implementation notes
 
 - Set `AI_PROVIDER=mock` to run the whole app offline with recorded extractions for the fixture documents.
+- Uploaded files are stored in the repo-root `uploads/` folder (`STORAGE_DRIVER=local`). Set `STORAGE_DRIVER=s3` to use MinIO or S3 instead.
 - `AI_MODEL` and `CONFIDENCE_THRESHOLD` are set in `apps/api/.env`.
 - If ports are taken locally, start the containers with `POSTGRES_PORT=5442 docker compose up -d` and update `DATABASE_URL` in `apps/api/.env`.
 - Full stack in containers: `docker compose --profile app up --build` (web on :8888, API on :4000).

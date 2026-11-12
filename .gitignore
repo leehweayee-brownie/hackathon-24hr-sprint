@@ -17,3 +17,6 @@ playwright-report/
 *.tsbuildinfo
 apps/web/public/pdfjs/
 .env*
+
+# /brag launch video output
+brag-output/

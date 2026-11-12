@@ -156,7 +156,6 @@ Role-gated `/admin` screen.
 - Manage organizations and users, suspend or delete accounts
 - Edit document types, extraction fields and rule weights
 - View processing queue health and failed extractions
-- View AI usage and cost per check
 
 ---
 

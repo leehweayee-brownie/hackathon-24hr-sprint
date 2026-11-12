@@ -15,4 +15,4 @@ apps/web/.env
 test-results/
 playwright-report/
 *.tsbuildinfo
-public/pdfjs/
+apps/web/public/pdfjs/

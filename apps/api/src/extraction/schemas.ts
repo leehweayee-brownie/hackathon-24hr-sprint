@@ -16,9 +16,17 @@ export const bboxSchema = z
   })
   .nullable();
 
+/**
+ * Printed value as text. Models sometimes return a list (categories ["B", "CE"]) or a bare number (2000000);
+ * both are turned into the text the normalizers expect instead of failing the whole extraction.
+ */
+export const rawValueSchema = z
+  .union([z.string(), z.number(), z.array(z.union([z.string(), z.number()])), z.null()])
+  .transform((v) => (v === null ? null : Array.isArray(v) ? v.map(String).join(', ') : String(v)));
+
 export const extractedFieldSchema = z.object({
   key: z.string().min(1),
-  rawValue: z.string().nullable(),
+  rawValue: rawValueSchema,
   confidence: z.number().min(0).max(1),
   page: z.number().int().min(1).default(1),
   bbox: bboxSchema.default(null),

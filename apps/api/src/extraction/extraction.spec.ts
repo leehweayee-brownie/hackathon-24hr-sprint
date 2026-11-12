@@ -5,7 +5,7 @@ import { DocType } from '@vp/shared';
 import { resolveRelativeDate } from '../common/utils/dates';
 import { normalizeFields } from './extraction.service';
 import { MockExtractionProvider } from './providers/mock.provider';
-import { extractJson } from './schemas';
+import { extractJson, extractionSchema } from './schemas';
 
 describe('normalizeFields', () => {
   it('normalizes values by field kind and fills in missing keys', () => {
@@ -82,5 +82,18 @@ describe('MockExtractionProvider', () => {
     const input = { fileName: 'mystery.pdf', sha256: 'y', mimeType: 'application/pdf', pageCount: 1 };
     expect((await provider.classify(input)).docType).toBe(DocType.OTHER);
     expect((await provider.extract(input, DocType.OTHER)).fields[0]).toMatchObject({ key: 'title', rawValue: 'mystery' });
+  });
+});
+
+describe('extractionSchema', () => {
+  it('accepts lists and numbers as printed values', () => {
+    const parsed = extractionSchema.parse({
+      fields: [
+        { key: 'categories', rawValue: ['B', 'CE'], confidence: 1, page: 1, bbox: null },
+        { key: 'coverage_amount', rawValue: 2000000, confidence: 0.9, page: 1, bbox: null },
+        { key: 'issuer', rawValue: null, confidence: 0.2, page: 1, bbox: null },
+      ],
+    });
+    expect(parsed.fields.map((f) => f.rawValue)).toEqual(['B, CE', '2000000', null]);
   });
 });

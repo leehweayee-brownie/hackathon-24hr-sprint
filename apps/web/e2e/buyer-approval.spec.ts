@@ -10,6 +10,7 @@ test('buyer opens a vendor check, sees the score with reasons and records a deci
   await expect(page.getByTestId('trust-score-ring')).toBeVisible();
   await page.getByTestId('request-info').click();
   await page.getByTestId('decision-note').fill('Please upload the latest ISO certificate.');
+  await page.getByTestId('decision-acknowledge').check();
   await page.getByTestId('decision-submit').click();
   await expect(page.getByText('More documents requested')).toBeVisible({ timeout: 15_000 });
 });

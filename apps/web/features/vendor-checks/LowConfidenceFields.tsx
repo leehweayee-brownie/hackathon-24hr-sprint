@@ -6,7 +6,7 @@ import { Check, Pencil } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
-import { Card, CardBody, CardHeader } from '@/components/ui/Card';
+import { PanelCard, PanelHeader } from '@/components/ui/PanelCard';
 import { ConfidenceBar } from '@/components/ui/ConfidenceBar';
 import { Input } from '@/components/ui/Input';
 import { documentsService } from '@/services/documents';
@@ -28,26 +28,26 @@ export function LowConfidenceFields({ fields, checkId, documentHref }: { fields:
 
   if (fields.length === 0) return null;
   return (
-    <Card data-testid="low-confidence-fields">
-      <CardHeader title="Fields to confirm" description={`${fields.length} value${fields.length === 1 ? '' : 's'} below the confidence threshold. Confirm or correct before approval.`} />
-      <CardBody className="p-0">
-        <ul className="divide-y divide-line-soft">
+    <PanelCard data-testid="low-confidence-fields">
+      <PanelHeader title="Fields to confirm" subtitle={`${fields.length} value${fields.length === 1 ? '' : 's'} below the confidence threshold. Confirm or correct before approval.`} />
+      <div>
+        <ul className="divide-y divide-gray-100">
           {fields.map((f) => (
             <li key={f.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3" data-testid="low-confidence-row">
               <div className="min-w-0 flex-1">
-                <p className="text-[12px] text-muted">
+                <p className="text-xs leading-4 text-gray-500">
                   {f.docType ? DOC_TYPE_DEFINITIONS[f.docType].label : 'Document'} ·{' '}
-                  <Link href={documentHref(f.documentId)} className="text-primary hover:underline">
+                  <Link href={documentHref(f.documentId)} className="text-brand hover:underline">
                     open page {f.page}
                   </Link>
                 </p>
-                <p className="text-[13px] font-medium text-ink">
-                  {f.label}: {editing === f.id ? null : <span className="font-normal">{f.value ?? <em className="text-muted">not found</em>}</span>}
+                <p className="text-sm font-medium leading-5 text-gray-800">
+                  {f.label}: {editing === f.id ? null : <span className="font-normal">{f.value ?? <em className="text-gray-400">not found</em>}</span>}
                 </p>
                 {editing === f.id ? (
                   <form className="mt-1 flex gap-1.5" onSubmit={(e) => { e.preventDefault(); correct.mutate({ id: f.id, value: draft }); }}>
                     <Input value={draft} onChange={(e) => setDraft(e.target.value)} className="h-8 max-w-xs" autoFocus />
-                    <Button size="sm" type="submit" loading={correct.isPending}>Save</Button>
+                    <Button size="sm" variant="brand" type="submit" loading={correct.isPending}>Save</Button>
                     <Button size="sm" type="button" variant="ghost" onClick={() => setEditing(null)}>Cancel</Button>
                   </form>
                 ) : null}
@@ -55,7 +55,7 @@ export function LowConfidenceFields({ fields, checkId, documentHref }: { fields:
               <ConfidenceBar value={f.confidence} />
               {editing !== f.id ? (
                 <div className="flex gap-1">
-                  <Button size="sm" onClick={() => confirm.mutate(f.id)} loading={confirm.isPending && confirm.variables === f.id}>
+                  <Button size="sm" variant="brand" onClick={() => confirm.mutate(f.id)} loading={confirm.isPending && confirm.variables === f.id}>
                     <Check className="size-3.5" /> Confirm
                   </Button>
                   <Button size="sm" variant="ghost" onClick={() => { setEditing(f.id); setDraft(f.value ?? ''); }}>
@@ -66,7 +66,7 @@ export function LowConfidenceFields({ fields, checkId, documentHref }: { fields:
             </li>
           ))}
         </ul>
-      </CardBody>
-    </Card>
+      </div>
+    </PanelCard>
   );
 }

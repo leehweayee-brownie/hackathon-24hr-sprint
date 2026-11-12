@@ -7,7 +7,7 @@ import { SoftBadge } from '@/features/dashboard/SoftBadge';
 import { formatDate } from '@/utils/format';
 import { isProcessing } from '@/utils/status';
 
-function StatusBadge({ status }: { status: DocumentStatus }) {
+export function StatusBadge({ status }: { status: DocumentStatus }) {
   if (status === DocumentStatus.VERIFIED) return <SoftBadge tone="teal">Verified</SoftBadge>;
   if (status === DocumentStatus.NEEDS_REVIEW) return <SoftBadge tone="amber">Needs review</SoftBadge>;
   if (status === DocumentStatus.FAILED) return <SoftBadge tone="red">Failed</SoftBadge>;

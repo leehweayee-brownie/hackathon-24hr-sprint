@@ -15,6 +15,7 @@ export function Modal({
   footer,
   size = 'md',
   variant = 'default',
+  dense = false,
 }: {
   open: boolean;
   onClose: () => void;
@@ -25,6 +26,8 @@ export function Modal({
   size?: 'md' | 'lg';
   /** `preline`: the Figma "Modal" spec (480px, 18/28 title, 24px padding, round close button). */
   variant?: 'default' | 'preline';
+  /** Preline only: 540px wide, 16/24 title, 20px padding and a gray-50 footer (Figma "Modal / Approve supplier"). */
+  dense?: boolean;
 }) {
   const preline = variant === 'preline';
   useEffect(() => {
@@ -52,7 +55,7 @@ export function Modal({
             className={cn(
               'w-full',
               preline
-                ? 'max-w-[480px] overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]'
+                ? `${dense ? 'max-w-[540px]' : 'max-w-[480px]'} overflow-hidden rounded-xl border border-gray-200 bg-white shadow-[0_20px_25px_-5px_rgba(0,0,0,0.1),0_8px_10px_-6px_rgba(0,0,0,0.1)]`
                 : `${size === 'lg' ? 'max-w-2xl' : 'max-w-md'} rounded-card border border-line bg-panel shadow-xl`,
             )}
             initial={{ opacity: 0, y: 12, scale: 0.98 }}
@@ -61,9 +64,9 @@ export function Modal({
             transition={{ duration: 0.22, ease: [0.2, 0, 0, 1] }}
           >
             {preline ? (
-              <div className="flex items-start gap-3 border-b border-gray-200 px-6 py-5">
+              <div className={cn('flex gap-3 border-b border-gray-200', dense ? 'items-center px-5 py-4' : 'items-start px-6 py-5')}>
                 <div className="flex min-w-0 flex-1 flex-col gap-1">
-                  <h2 className="text-lg font-semibold leading-7 text-gray-800">{title}</h2>
+                  <h2 className={cn('font-semibold text-gray-800', dense ? 'text-base leading-6' : 'text-lg leading-7')}>{title}</h2>
                   {description ? <p className="text-sm leading-5 text-gray-500">{description}</p> : null}
                 </div>
                 <button type="button" onClick={onClose} aria-label="Close" className="flex size-8 shrink-0 items-center justify-center rounded-full text-gray-500 hover:bg-gray-100 hover:text-gray-800">
@@ -81,9 +84,11 @@ export function Modal({
                 </Button>
               </div>
             )}
-            {children ? <div className={preline ? 'p-6' : 'px-5 py-4'}>{children}</div> : null}
+            {children ? <div className={preline ? (dense ? 'p-5' : 'p-6') : 'px-5 py-4'}>{children}</div> : null}
             {footer ? (
-              <div className={cn('flex justify-end gap-2 border-t', preline ? 'border-gray-200 px-6 py-4' : 'border-line-soft px-5 py-3')}>{footer}</div>
+              <div className={cn('flex justify-end gap-2 border-t', preline ? (dense ? 'border-gray-200 bg-gray-50 px-5 py-4' : 'border-gray-200 px-6 py-4') : 'border-line-soft px-5 py-3')}>
+                {footer}
+              </div>
             ) : null}
           </motion.div>
         </motion.div>

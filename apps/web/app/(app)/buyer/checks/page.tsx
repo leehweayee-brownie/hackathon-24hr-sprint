@@ -70,8 +70,8 @@ export default function VendorChecksPage() {
             {greeting()}
             {firstName ? `, ${firstName}` : ''} —{' '}
             {waiting === 0
-              ? 'no suppliers are waiting for your decision.'
-              : `${waiting} ${waiting === 1 ? 'supplier is' : 'suppliers are'} waiting for your decision.`}
+              ? 'no vendors are waiting for your decision.'
+              : `${waiting} ${waiting === 1 ? 'vendor is' : 'vendors are'} waiting for your decision.`}
           </p>
         </div>
         <Link href="/buyer/checks/new" className="inline-flex items-center justify-center gap-2 rounded-lg bg-brand px-3 py-2 text-sm font-medium leading-5 text-white hover:bg-brand-hover">

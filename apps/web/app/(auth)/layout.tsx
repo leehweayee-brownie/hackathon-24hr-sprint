@@ -7,10 +7,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
       <div className="hidden w-[46%] flex-col justify-between border-r border-line bg-panel p-10 lg:flex">
         <Logo />
         <div className="max-w-md">
-          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-primary">Supplier onboarding</p>
+          <p className="text-[12px] font-medium uppercase tracking-[0.08em] text-primary">Vendor onboarding</p>
           <h2 className="mt-3 text-[32px] font-semibold leading-tight tracking-[-0.02em] text-ink">Upload once, reuse everywhere.</h2>
           <p className="mt-4 text-[15px] leading-relaxed text-muted">
-            Drop a supplier&apos;s documents once. Every certificate is sorted, read and cross-checked against the others, so buyers get a trust score with reasons and suppliers get a passport they can share by link.
+            Drop a vendor&apos;s documents once. Every certificate is sorted, read and cross-checked against the others, so buyers get a trust score with reasons and vendors get a passport they can share by link.
           </p>
           <dl className="mt-8 grid grid-cols-3 gap-4 text-[13px]">
             <div>

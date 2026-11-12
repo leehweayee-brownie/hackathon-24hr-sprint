@@ -55,7 +55,7 @@ export default function VendorMatchPage() {
       void qc.invalidateQueries({ queryKey: ['vendor-checks'] });
       toast({
         title: action === 'invite' ? `${shortCompanyName(m.supplierName)} invited to tender` : `Documents requested from ${shortCompanyName(m.supplierName)}`,
-        description: action === 'invite' ? 'A vendor check is open and the supplier has been notified.' : 'They have been told exactly what to upload.',
+        description: action === 'invite' ? 'A vendor check is open and the vendor has been notified.' : 'They have been told exactly what to upload.',
         tone: 'success',
       });
     } catch (e) {

@@ -21,11 +21,11 @@ const schema = z.object({
 type FormValues = z.infer<typeof schema>;
 
 type Role = 'supplier' | 'buyer';
-const ROLE_LABELS: Record<Role, string> = { supplier: 'Supplier', buyer: 'Buyer' };
+const ROLE_LABELS: Record<Role, string> = { supplier: 'Vendor', buyer: 'Buyer' };
 
 const DEMO_PASSWORD = 'Password123!';
 const DEMO_ACCOUNTS: Array<{ role: Role; label: string; email: string }> = [
-  { role: 'supplier', label: 'Supplier Demo · Bina Jaya Sdn Bhd', email: 'supplier@binajaya.local' },
+  { role: 'supplier', label: 'Vendor Demo · Bina Jaya Sdn Bhd', email: 'supplier@binajaya.local' },
   { role: 'buyer', label: 'Buyer Demo · Procurement Officer', email: 'buyer@procurement.local' },
 ];
 
@@ -66,7 +66,7 @@ function LoginForm() {
         <div className={cn('w-[180px]', labelClass)}>
           <Field label="Your Role" htmlFor="role">
             <Select id="role" chevron value={role} onChange={(e) => setRole(e.target.value as Role)} className={fieldClass}>
-              <option value="supplier">Supplier</option>
+              <option value="supplier">Vendor</option>
               <option value="buyer">Buyer</option>
             </Select>
           </Field>

@@ -74,7 +74,7 @@ export default function PublicPassportPage() {
         </span>
         <h1 className="mt-1 text-lg font-semibold leading-7 text-gray-900">{title}</h1>
         <p className="text-sm leading-5 text-gray-500">{errorMessage(err)}</p>
-        <p className="text-sm leading-5 text-gray-500">Ask the supplier for a new link, or request access from inside VendVet.</p>
+        <p className="text-sm leading-5 text-gray-500">Ask the vendor for a new link, or request access from inside VendVet.</p>
         <Link href="/login" className={`${secondaryButtonClass} mt-3`}>
           <Lock className="size-4" aria-hidden /> Sign in to request access
         </Link>
@@ -105,7 +105,7 @@ export default function PublicPassportPage() {
             <Info className="size-4 shrink-0 text-amber-600" aria-hidden />
             <p className="text-sm leading-5 text-amber-800">
               {missing > 0
-                ? `This passport is a draft — the supplier hasn’t uploaded ${missing} required ${missing === 1 ? 'document' : 'documents'} yet, so the trust score may change.`
+                ? `This passport is a draft — the vendor hasn’t uploaded ${missing} required ${missing === 1 ? 'document' : 'documents'} yet, so the trust score may change.`
                 : 'This passport is a draft — some documents are still being reviewed, so the trust score may change.'}
             </p>
           </div>

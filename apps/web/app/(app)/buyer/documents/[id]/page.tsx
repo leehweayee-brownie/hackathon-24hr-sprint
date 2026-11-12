@@ -14,7 +14,7 @@ function BuyerDocument() {
   const checkId = params.get('check');
   const doc = useDocument(id);
   if (doc.isLoading) return <PageSkeleton />;
-  if (doc.isError || !doc.data) return <EmptyState title="Document not available" description={doc.error ? errorMessage(doc.error) : 'You can only view documents of suppliers you are checking.'} />;
+  if (doc.isError || !doc.data) return <EmptyState title="Document not available" description={doc.error ? errorMessage(doc.error) : 'You can only view documents of vendors you are checking.'} />;
   return (
     <DocumentViewer
       doc={doc.data}

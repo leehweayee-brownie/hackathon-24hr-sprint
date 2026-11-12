@@ -90,7 +90,7 @@ export function DocumentsCard({
       )}
       {isPublic ? (
         <p className="flex items-center gap-2 border-t border-gray-100 bg-gray-50 px-5 py-3 text-xs leading-4 text-gray-500">
-          <Lock className="size-3.5 shrink-0" aria-hidden /> Request full access to download originals and see the supplier’s contact details.
+          <Lock className="size-3.5 shrink-0" aria-hidden /> Request full access to download originals and see the vendor’s contact details.
         </p>
       ) : null}
     </PanelCard>

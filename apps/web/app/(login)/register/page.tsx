@@ -94,7 +94,7 @@ export default function RegisterPage() {
     <div className="flex w-full max-w-[420px] flex-col gap-5">
       <div className="flex flex-col gap-1.5">
         <h1 className="text-2xl font-semibold leading-8 text-gray-900">Register your organisation</h1>
-        <p className="text-sm leading-5 text-gray-500">Suppliers build a passport. Buyers run vendor checks.</p>
+        <p className="text-sm leading-5 text-gray-500">Vendors build a passport. Buyers run vendor checks.</p>
       </div>
 
       <form className="flex flex-col gap-5" onSubmit={handleSubmit(onSubmit)} noValidate>
@@ -115,9 +115,9 @@ export default function RegisterPage() {
                 )}
               >
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
-                  <span className={cn('text-sm font-semibold leading-5', selected ? 'text-brand-700' : 'text-gray-800')}>{t === 'SUPPLIER' ? 'Supplier' : 'Buyer'}</span>
+                  <span className={cn('text-sm font-semibold leading-5', selected ? 'text-brand-700' : 'text-gray-800')}>{t === 'SUPPLIER' ? 'Vendor' : 'Buyer'}</span>
                   <span className={cn('truncate text-xs leading-4', selected ? 'text-brand' : 'text-gray-500')}>
-                    {t === 'SUPPLIER' ? 'Contractor or vendor' : 'Procurement organisation'}
+                    {t === 'SUPPLIER' ? 'Contractor or service provider' : 'Procurement organisation'}
                   </span>
                 </span>
                 <span

@@ -5,7 +5,7 @@ import { Providers } from './providers';
 
 export const metadata: Metadata = {
   title: { default: 'VendVet', template: '%s · VendVet' },
-  description: 'AI-powered supplier onboarding. Upload once, reuse everywhere.',
+  description: 'AI-powered vendor onboarding. Upload once, reuse everywhere.',
 };
 
 // Applies the saved theme and cursor before first paint, so neither flashes on load.

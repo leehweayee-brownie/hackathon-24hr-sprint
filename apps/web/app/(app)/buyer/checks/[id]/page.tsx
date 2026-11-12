@@ -328,7 +328,7 @@ export default function VendorCheckPage() {
             <PanelCard>
               <PanelHeader title="Documents" subtitle={`${documents.length} on file · ${a.presentCount} of ${a.requiredCount} required types provided`} />
               {documents.length === 0 ? (
-                <p className="px-5 py-6 text-center text-sm text-gray-500">The supplier has not uploaded documents yet.</p>
+                <p className="px-5 py-6 text-center text-sm text-gray-500">The vendor has not uploaded documents yet.</p>
               ) : (
                 <ul>
                   {documents.map((d) => {

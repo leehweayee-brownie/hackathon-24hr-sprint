@@ -53,7 +53,7 @@ const NAV: Record<Area, NavSection[]> = {
   ],
 };
 
-const AREA_BADGE: Record<Area, string> = { supplier: 'Supplier', buyer: 'Buyer', admin: 'Admin' };
+const AREA_BADGE: Record<Area, string> = { supplier: 'Vendor', buyer: 'Buyer', admin: 'Admin' };
 
 /** Figma "Sidebar" (Preline): 260px, white, brand-tinted active item. Collapsed: 72px icon rail. */
 function Sidebar({

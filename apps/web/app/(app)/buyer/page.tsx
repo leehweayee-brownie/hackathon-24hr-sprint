@@ -69,7 +69,7 @@ export default function BuyerDashboard() {
           </span>
           <div className="flex min-w-0 flex-1 flex-col gap-0.5">
             <p className="text-sm font-semibold leading-5 text-gray-800">
-              {riskySuppliers.length} of {queueSuppliers} {queueSuppliers === 1 ? 'supplier' : 'suppliers'} in your queue{' '}
+              {riskySuppliers.length} of {queueSuppliers} {queueSuppliers === 1 ? 'vendor' : 'vendors'} in your queue{' '}
               {sameScore ? `scored ${top.trustScore} / 100` : 'scored below 60 / 100'}
             </p>
             <p className="text-sm leading-5 text-gray-600">
@@ -101,7 +101,7 @@ export default function BuyerDashboard() {
           className="min-h-0"
           label="Rejected"
           value={rejected}
-          hint={rejected === 0 ? 'No suppliers rejected' : 'Not cleared for POs'}
+          hint={rejected === 0 ? 'No vendors rejected' : 'Not cleared for POs'}
           icon={CircleX}
           iconBox="bg-gray-100"
           iconColor="text-gray-500"
@@ -111,7 +111,7 @@ export default function BuyerDashboard() {
           label="Expiring documents"
           value={expiring}
           badge={expiring === 0 ? <SoftBadge tone="teal">All valid</SoftBadge> : <SoftBadge tone="amber">Needs attention</SoftBadge>}
-          hint="Across suppliers you rely on"
+          hint="Across vendors you rely on"
           icon={CalendarClock}
           iconBox="bg-amber-50"
           iconColor="text-amber-600"
@@ -133,7 +133,7 @@ export default function BuyerDashboard() {
         <div className="overflow-x-auto">
           <div className="min-w-[960px]" role="table" aria-label="Review queue">
             <div className="flex gap-4 border-b border-gray-200 bg-gray-50 px-5 py-3 text-xs font-medium uppercase leading-4 tracking-[0.4px] text-gray-500" role="row">
-              <span className="min-w-0 flex-1" role="columnheader">Supplier</span>
+              <span className="min-w-0 flex-1" role="columnheader">Vendor</span>
               <span className={COLS.tender} role="columnheader">Tender</span>
               <span className={COLS.value} role="columnheader">Value</span>
               <span className={COLS.score} role="columnheader">Score</span>

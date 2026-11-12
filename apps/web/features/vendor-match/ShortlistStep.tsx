@@ -130,7 +130,7 @@ export function ShortlistStep({
         <span className="hidden shrink-0 text-xs leading-4 text-gray-500 sm:block">Ranked by fit, gaps, ratings and trust score</span>
       </PanelHeader>
       {result.matches.length === 0 ? (
-        <p className="px-5 py-8 text-center text-sm text-gray-500">No suppliers with verified documents yet.</p>
+        <p className="px-5 py-8 text-center text-sm text-gray-500">No vendors with verified documents yet.</p>
       ) : (
         <ul>
           {result.matches.map((m) => (

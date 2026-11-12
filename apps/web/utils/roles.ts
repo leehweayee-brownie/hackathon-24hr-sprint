@@ -23,8 +23,8 @@ export function isApprover(user: UserView | null | undefined): boolean {
 }
 
 export const ROLE_LABELS: Record<UserRole, string> = {
-  [UserRole.SUPPLIER_OWNER]: 'Supplier owner',
-  [UserRole.SUPPLIER_MEMBER]: 'Supplier member',
+  [UserRole.SUPPLIER_OWNER]: 'Vendor owner',
+  [UserRole.SUPPLIER_MEMBER]: 'Vendor member',
   [UserRole.BUYER_PROCUREMENT]: 'Procurement officer',
   [UserRole.BUYER_CONTRACTS]: 'Contracts officer',
   [UserRole.BUYER_FINANCE]: 'Finance officer',

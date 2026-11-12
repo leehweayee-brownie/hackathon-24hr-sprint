@@ -20,11 +20,11 @@ type Action = 'approve' | 'reject' | 'request-info';
 
 const COPY: Record<Action, { title: string; cta: string; button: string }> = {
   approve: {
-    title: 'Approve supplier',
+    title: 'Approve vendor',
     cta: 'Confirm approval',
     button: 'bg-brand text-white hover:bg-brand-hover',
   },
-  reject: { title: 'Reject supplier', cta: 'Reject supplier', button: 'bg-brand text-white hover:bg-brand-hover' },
+  reject: { title: 'Reject vendor', cta: 'Reject vendor', button: 'bg-brand text-white hover:bg-brand-hover' },
   'request-info': {
     title: 'Request more documents',
     cta: 'Request more documents',
@@ -44,7 +44,7 @@ const CONFIRM = {
   },
   reject: {
     verb: 'Reject',
-    consequence: 'They won’t receive new POs for this tender, and the supplier is told why.',
+    consequence: 'They won’t receive new POs for this tender, and the vendor is told why.',
     badgeBg: 'bg-brand-100',
     badgeIcon: '/figma/share/x-circle.svg',
     cancel: 'Cancel',
@@ -81,7 +81,7 @@ export function DecisionCard({ check }: { check: VendorCheckView }) {
       void qc.invalidateQueries({ queryKey: ['audit'] });
       setAction(null);
       setNote('');
-      toast({ title: a === 'approve' ? 'Vendor approved' : a === 'reject' ? 'Vendor rejected' : 'Request sent to supplier', tone: a === 'reject' ? 'warning' : 'success' });
+      toast({ title: a === 'approve' ? 'Vendor approved' : a === 'reject' ? 'Vendor rejected' : 'Request sent to vendor', tone: a === 'reject' ? 'warning' : 'success' });
     },
     onError: (e) => {
       if (e instanceof HttpError && (e.code === ErrorCode.APPROVER_REQUIRED || e.code === ErrorCode.FIELD_CONFIRMATION_REQUIRED || e.status === 403)) {
@@ -228,10 +228,10 @@ export function DecisionCard({ check }: { check: VendorCheckView }) {
           <label htmlFor="decision-note" className="text-sm font-medium leading-5 text-gray-800">
             {confirming ? (
               <>
-                Note to supplier<span className="text-red-700">*</span>
+                Note to vendor<span className="text-red-700">*</span>
               </>
             ) : (
-              'Reason shown to the supplier'
+              'Reason shown to the vendor'
             )}
           </label>
           <textarea

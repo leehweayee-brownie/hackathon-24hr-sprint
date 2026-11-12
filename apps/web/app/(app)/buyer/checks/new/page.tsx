@@ -51,19 +51,19 @@ export default function NewVendorCheckPage() {
   });
   const requestAccess = useMutation({
     mutationFn: () => passportService.createAccessRequest({ supplierId, message: requestMessage || undefined }),
-    onSuccess: () => toast({ title: 'Access requested', description: 'The supplier is notified and can grant you a share link.', tone: 'success' }),
+    onSuccess: () => toast({ title: 'Access requested', description: 'The vendor is notified and can grant you a share link.', tone: 'success' }),
     onError: (e) => toast({ title: 'Could not request access', description: errorMessage(e), tone: 'danger' }),
   });
 
   return (
     <div className="mx-auto max-w-3xl">
-      <PageHeader title="New vendor check" description="Score a supplier's passport against one tender or contract." />
+      <PageHeader title="New vendor check" description="Score a vendor's passport against one tender or contract." />
       <form onSubmit={handleSubmit((v) => create.mutate(v))} noValidate>
         <Card>
           <CardBody className="space-y-5">
             <Field label="Supplier" error={formState.errors.supplierId?.message} htmlFor="supplierId">
               <Select id="supplierId" {...register('supplierId')} error={formState.errors.supplierId?.message} data-testid="supplier-select">
-                <option value="">{suppliers.isLoading ? 'Loading suppliers…' : 'Choose a supplier'}</option>
+                <option value="">{suppliers.isLoading ? 'Loading vendors…' : 'Choose a vendor'}</option>
                 {(suppliers.data ?? []).map((s) => (
                   <option key={s.id} value={s.id}>
                     {s.name}
@@ -110,7 +110,7 @@ export default function NewVendorCheckPage() {
       </form>
 
       <Card className="mt-6">
-        <CardHeader title="No passport shared yet?" description="Ask the supplier for access to their passport from inside the app." />
+        <CardHeader title="No passport shared yet?" description="Ask the vendor for access to their passport from inside the app." />
         <CardBody className="space-y-3">
           <Textarea value={requestMessage} onChange={(e) => setRequestMessage(e.target.value)} placeholder="Hi, we are evaluating you for Package 3B and would like to view your Vendor Passport." className="min-h-20" />
           <div className="flex justify-end">

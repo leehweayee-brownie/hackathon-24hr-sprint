@@ -1,5 +1,5 @@
 import type { Document, DocumentField, User } from '@prisma/client';
-import { DocType, DocumentFieldView, DocumentStatus, DocumentView, docTypeLabel, fieldLabel } from '@vp/shared';
+import { DOC_TYPE_DEFINITIONS, DocType, DocumentFieldView, DocumentStatus, DocumentView, docTypeLabel, fieldLabel } from '@vp/shared';
 import { toIsoDate } from '../common/utils/dates';
 
 export type FieldWithUser = DocumentField & { confirmedBy?: Pick<User, 'id' | 'name'> | null };
@@ -7,6 +7,16 @@ export type DocumentWithFields = Document & { fields?: FieldWithUser[] };
 
 export function effectiveValue(f: Pick<DocumentField, 'correctedValue' | 'normalizedValue' | 'rawValue'>): string | null {
   return f.correctedValue ?? f.normalizedValue ?? f.rawValue ?? null;
+}
+
+/**
+ * Value handed to the rules engine. Company names keep their printed form, because the engine normalizes
+ * names itself before comparing and quotes them in findings ("Bina Jaya Engineering Sdn Bhd").
+ */
+export function ruleValue(f: Pick<DocumentField, 'key' | 'correctedValue' | 'normalizedValue' | 'rawValue'>, docType: DocType): string | null {
+  const kind = DOC_TYPE_DEFINITIONS[docType]?.fields.find((d) => d.key === f.key)?.kind;
+  if (kind === 'company_name') return f.correctedValue ?? f.rawValue ?? f.normalizedValue ?? null;
+  return effectiveValue(f);
 }
 
 export function toFieldView(f: FieldWithUser, docType: DocType | null, threshold: number): DocumentFieldView {

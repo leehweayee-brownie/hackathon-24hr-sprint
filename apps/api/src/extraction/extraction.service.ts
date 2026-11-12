@@ -81,9 +81,8 @@ export class ExtractionService {
 
   /** Persists fields and derives issuedAt / expiresAt + the review status. */
   async persist(documentId: string, docType: DocType, classification: ClassificationResult, fields: NormalizedField[], confidenceThreshold: number): Promise<DocumentStatus> {
-    const def = DOC_TYPE_DEFINITIONS[docType];
-    const requiredKeys = new Set(def.fields.filter((f) => f.required).map((f) => f.key));
-    const needsReview = docType !== DocType.OTHER && fields.some((f) => requiredKeys.has(f.key) && f.confidence < confidenceThreshold);
+    // Every field read below the threshold must be confirmed by a person, required or not (README: Extraction).
+    const needsReview = docType !== DocType.OTHER && fields.some((f) => f.confidence < confidenceThreshold);
     const status = needsReview ? DocumentStatus.NEEDS_REVIEW : DocumentStatus.VERIFIED;
     const issuedAt = fromIsoDate(fields.find((f) => f.key === 'issue_date')?.normalizedValue ?? fields.find((f) => f.key === 'incorporation_date')?.normalizedValue);
     const expiresAt = fromIsoDate(fields.find((f) => f.key === 'expiry_date')?.normalizedValue);

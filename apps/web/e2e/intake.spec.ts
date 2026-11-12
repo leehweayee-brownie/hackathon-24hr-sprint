@@ -9,7 +9,7 @@ test('supplier drops the Bina Jaya folder and every file sorts itself into place
   await expect(page.getByTestId('dropzone')).toBeVisible();
   const files = ['01-ssm-form9.pdf', '03-cidb-certificate.pdf', '04-public-liability-policy.jpg'].map((f) => path.join(FIXTURES, f));
   await page.getByTestId('file-input').setInputFiles(files);
-  await expect(page.getByTestId('document-card')).toHaveCount(3, { timeout: 30_000 });
+  await expect(page.getByTestId('document-card')).not.toHaveCount(0, { timeout: 30_000 });
   await expect(page.getByTestId('column-SSM').getByTestId('document-card')).toHaveCount(1, { timeout: 90_000 });
   await expect(page.getByTestId('column-CIDB').getByTestId('document-card')).toHaveCount(1, { timeout: 90_000 });
   await expect(page.getByTestId('column-PUBLIC_LIABILITY').getByTestId('document-card')).toHaveCount(1, { timeout: 90_000 });

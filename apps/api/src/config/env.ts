@@ -35,7 +35,7 @@ export const envSchema = z.object({
 
   AI_PROVIDER: z.enum(['anthropic', 'mock']).default('mock'),
   ANTHROPIC_API_KEY: z.string().optional(),
-  AI_MODEL: z.string().default('claude-sonnet-4-5'),
+  AI_MODEL: z.string().default('claude-sonnet-5-5'),
   AI_MAX_PAGES: z.coerce.number().default(20),
   CONFIDENCE_THRESHOLD: z.coerce.number().min(0).max(1).default(0.85),
   EXPIRY_WARNING_DAYS: z.coerce.number().default(30),

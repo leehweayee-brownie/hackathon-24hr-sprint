@@ -14,7 +14,7 @@ const csp = [
   "script-src 'self' 'unsafe-inline' 'unsafe-eval' blob:",
   "worker-src 'self' blob:",
   "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
-  'font-src https://fonts.gstatic.com data:',
+  "font-src 'self' https://fonts.gstatic.com data:",
   `img-src 'self' data: blob: ${storageOrigins} ${apiUrl}`,
   `frame-src 'self' blob: ${storageOrigins} ${apiUrl}`,
   "base-uri 'self'",

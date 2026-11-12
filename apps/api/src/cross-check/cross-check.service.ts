@@ -2,7 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import type { Prisma, VendorCheck } from '@prisma/client';
 import { EvaluationResult, RuleDocument, buildTimeline, evaluate } from '@vp/rules';
 import { DocType, DocumentStatus, Finding, FindingsUpdatedEvent, SOCKET_EVENTS, TimelineEntry, VendorCheckStatus } from '@vp/shared';
-import { effectiveValue } from '../documents/document.mapper';
+import { ruleValue } from '../documents/document.mapper';
 import { toIsoDate } from '../common/utils/dates';
 import { PrismaService } from '../database/prisma.service';
 import { OrganizationsService, ResolvedSettings } from '../organizations/organizations.service';
@@ -25,16 +25,19 @@ export class CrossCheckService {
 
   async buildRuleDocuments(supplierId: string): Promise<RuleDocument[]> {
     const docs = await this.prisma.document.findMany({ where: { supplierId }, include: { fields: true }, orderBy: { createdAt: 'asc' } });
-    return docs.map((d) => ({
+    return docs.map((d) => {
+      const docType = (d.docType as DocType | null) ?? DocType.OTHER;
+      return {
       id: d.id,
-      docType: (d.docType as DocType | null) ?? DocType.OTHER,
+      docType,
       status: d.status as DocumentStatus,
       fileName: d.fileName,
       issuedAt: toIsoDate(d.issuedAt),
       expiresAt: toIsoDate(d.expiresAt),
       supersededById: d.supersededById,
-      fields: Object.fromEntries(d.fields.map((f) => [f.key, { value: effectiveValue(f), confidence: f.confidence, confirmed: f.confirmedAt !== null }])),
-    }));
+      fields: Object.fromEntries(d.fields.map((f) => [f.key, { value: ruleValue(f, docType), confidence: f.confidence, confirmed: f.confirmedAt !== null }])),
+      };
+    });
   }
 
   evaluateSupplier(docs: RuleDocument[], settings: ResolvedSettings, now = new Date()): EvaluationResult {

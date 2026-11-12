@@ -67,7 +67,7 @@ export class RealtimeGateway implements OnGatewayConnection, OnModuleInit {
       this.prisma.passportShare.findFirst({ where: { buyerId: user.organizationId, revokedAt: null, passport: { supplierId } }, select: { id: true } }),
     ]);
     if (!check && !share) {
-      client.emit(SOCKET_EVENTS.error, { code: 'FORBIDDEN', message: 'No vendor check or share with this supplier' });
+      client.emit(SOCKET_EVENTS.error, { code: 'FORBIDDEN', message: 'No vendor check or share with this vendor' });
       return { ok: false };
     }
     await client.join(supplierRoom(supplierId));

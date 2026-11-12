@@ -29,7 +29,7 @@ export class VendorChecksService {
   async create(user: RequestUser, dto: CreateVendorCheckDto): Promise<VendorCheckView> {
     this.assertBuyer(user);
     const supplier = await this.prisma.organization.findFirst({ where: { id: dto.supplierId, type: 'SUPPLIER' } });
-    if (!supplier) throw AppException.notFound('Supplier');
+    if (!supplier) throw AppException.notFound('Vendor');
     const check = await this.prisma.vendorCheck.create({
       data: {
         buyerId: user.organizationId,

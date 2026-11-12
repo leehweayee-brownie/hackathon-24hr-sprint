@@ -165,7 +165,7 @@ export class VendorMatchService {
       select: { id: true },
     });
     if (existing) return this.checks.get(user, existing.id);
-    if (!requirements.contractValue) throw new AppException(ErrorCode.VALIDATION_FAILED, 'Add the contract value before inviting suppliers', HttpStatus.BAD_REQUEST);
+    if (!requirements.contractValue) throw new AppException(ErrorCode.VALIDATION_FAILED, 'Add the contract value before inviting vendors', HttpStatus.BAD_REQUEST);
     return this.checks.create(user, {
       supplierId,
       tenderTitle: requirements.title,

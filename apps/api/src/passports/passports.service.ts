@@ -42,7 +42,7 @@ export class PassportsService {
       this.organizations.resolveSettings(supplierId),
       this.crossCheck.buildRuleDocuments(supplierId),
     ]);
-    if (!supplier) throw AppException.notFound('Supplier');
+    if (!supplier) throw AppException.notFound('Vendor');
     const docs = await this.prisma.document.findMany({
       where: { supplierId, supersededById: null },
       include: { fields: { include: { confirmedBy: { select: { id: true, name: true } } } } },
@@ -162,7 +162,7 @@ export class PassportsService {
         this.prisma.vendorCheck.findFirst({ where: { buyerId: user.organizationId, supplierId } }),
         this.prisma.passportShare.findFirst({ where: { buyerId: user.organizationId, revokedAt: null, passport: { supplierId } } }),
       ]);
-      if (!check && !share) throw AppException.forbidden('No vendor check or share with this supplier');
+      if (!check && !share) throw AppException.forbidden('No vendor check or share with this vendor');
     }
     return this.view(supplierId);
   }

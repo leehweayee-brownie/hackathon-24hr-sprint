@@ -21,7 +21,7 @@ export class AccessRequestsService {
   async create(user: RequestUser, dto: CreateAccessRequestDto) {
     if (user.organizationType !== OrganizationType.BUYER) throw AppException.forbidden('Only buyers request passport access');
     const supplier = await this.prisma.organization.findFirst({ where: { id: dto.supplierId, type: 'SUPPLIER' } });
-    if (!supplier) throw AppException.notFound('Supplier');
+    if (!supplier) throw AppException.notFound('Vendor');
     const existing = await this.prisma.accessRequest.findFirst({ where: { buyerId: user.organizationId, supplierId: dto.supplierId, status: AccessRequestStatus.PENDING } });
     if (existing) return this.toView(await this.prisma.accessRequest.findUniqueOrThrow({ where: { id: existing.id }, include: { buyer: true, supplier: true, requestedBy: true } }));
     const req = await this.prisma.accessRequest.create({

@@ -29,7 +29,7 @@ export class DocumentAccessService {
   assertCanWriteSupplier(user: RequestUser, supplierId: string): void {
     if (user.role === UserRole.ADMIN) return;
     if (user.organizationType !== OrganizationType.SUPPLIER || user.organizationId !== supplierId) {
-      throw AppException.forbidden('Only the supplier can change its documents');
+      throw AppException.forbidden('Only the vendor can change its documents');
     }
   }
 }

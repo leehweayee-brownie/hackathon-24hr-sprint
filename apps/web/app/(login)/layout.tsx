@@ -10,7 +10,7 @@ export default function LoginLayout({ children }: { children: ReactNode }) {
   return (
     // Exactly one screen high: the page itself never scrolls. On very short screens only the form panel scrolls.
     <main className="flex h-dvh overflow-hidden bg-brand-tint">
-      <div className="flex h-full w-full overflow-y-auto bg-white px-4 py-10 lg:w-1/2 lg:shrink-0 [@media(min-height:701px)_and_(max-height:840px)]:py-2 [@media(max-height:700px)]:py-2">
+      <div className="flex h-full w-full overflow-y-auto bg-white px-4 py-10 lg:w-1/2 lg:shrink-0 [@media(min-height:701px)_and_(max-height:899px)]:py-2 [@media(max-height:700px)]:py-2">
         {/* m-auto centres the card and still lets it scroll from the top when it is taller than the panel */}
         <div className="m-auto flex w-full justify-center">{children}</div>
       </div>

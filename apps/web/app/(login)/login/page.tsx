@@ -53,8 +53,8 @@ function LoginForm() {
   };
 
   return (
-    // Design spacing (32px between sections) from 840px tall; tighter steps below so the card fits without scrolling.
-    <div className="flex w-full max-w-[523px] flex-col items-end gap-8 rounded-xl p-6 [@media(min-height:761px)_and_(max-height:840px)]:gap-4 [@media(min-height:701px)_and_(max-height:760px)]:gap-3 [@media(max-height:700px)]:gap-2.5 [@media(max-height:700px)]:py-3">
+    // Design spacing (32px between sections) from 900px tall; tighter steps below so the card fits without scrolling.
+    <div className="flex w-full max-w-[523px] flex-col items-end gap-8 rounded-xl p-6 [@media(min-height:761px)_and_(max-height:899px)]:gap-4 [@media(min-height:701px)_and_(max-height:760px)]:gap-3 [@media(min-height:701px)_and_(max-height:760px)]:py-4 [@media(max-height:700px)]:gap-2.5 [@media(max-height:700px)]:py-3">
       {/* Figma "Group 1": VendVet mark (21×23) and Inter Black wordmark, top left of the card */}
       <div className="flex h-7 w-full items-center gap-0.5" role="img" aria-label="VendVet">
         {/* eslint-disable-next-line @next/next/no-img-element -- static brand asset from Figma */}
@@ -122,8 +122,8 @@ function LoginForm() {
       {/* Register */}
       <div className="flex w-full flex-col items-center gap-2">
         <p className="text-center text-sm leading-5 text-black">No account? Register now.</p>
-        <Link href="/register" className="rounded-card px-3 py-2 text-sm font-medium leading-5 text-link hover:underline">
-          Log In
+        <Link href="/register" className="rounded-lg px-3 py-2 text-sm font-medium leading-5 text-link hover:underline">
+          Sign up
         </Link>
       </div>
 

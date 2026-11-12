@@ -117,7 +117,7 @@ export default function RegisterPage() {
                 <span className="flex min-w-0 flex-1 flex-col gap-0.5">
                   <span className={cn('text-sm font-semibold leading-5', selected ? 'text-brand-700' : 'text-gray-800')}>{t === 'SUPPLIER' ? 'Vendor' : 'Buyer'}</span>
                   <span className={cn('truncate text-xs leading-4', selected ? 'text-brand' : 'text-gray-500')}>
-                    {t === 'SUPPLIER' ? 'Contractor or service provider' : 'Procurement organisation'}
+                    {t === 'SUPPLIER' ? 'Contractor or provider' : 'Procurement organisation'}
                   </span>
                 </span>
                 <span

@@ -1,0 +1,86 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_USER: vp
+          POSTGRES_PASSWORD: vp
+          POSTGRES_DB: vendor_passport
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U vp -d vendor_passport"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+      redis:
+        image: redis:7-alpine
+        ports: ["6379:6379"]
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+
+    env:
+      DATABASE_URL: postgresql://vp:vp@localhost:5432/vendor_passport
+      REDIS_URL: redis://localhost:6379
+      STORAGE_DRIVER: local
+      LOCAL_STORAGE_DIR: ./uploads
+      AI_PROVIDER: mock
+      FIXTURES_DIR: ../../fixtures
+      JWT_SECRET: ci-only-secret-that-is-at-least-32-characters-long
+      SHARE_TOKEN_SECRET: ci-only-share-secret-at-least-32-characters-long
+      WEB_URL: http://localhost:8888
+      CORS_ORIGIN: http://localhost:8888
+      NEXT_PUBLIC_API_URL: http://localhost:4000
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install
+        run: npm ci --no-audit --no-fund
+
+      - name: Build shared packages
+        run: npm run build:packages
+
+      - name: Rules engine unit tests
+        run: npm test -w @vp/rules
+
+      - name: Prisma generate and migrate
+        run: |
+          npx -w @vp/api prisma generate
+          npx -w @vp/api prisma migrate deploy
+
+      - name: API typecheck, unit tests and build
+        run: |
+          npm run typecheck -w @vp/api
+          npm test -w @vp/api
+          npm run build -w @vp/api
+
+      - name: API e2e (REST and pipeline, mock AI)
+        run: npm run test:e2e -w @vp/api
+
+      - name: Web typecheck, component tests and build
+        run: |
+          npm run typecheck -w @vp/web
+          npm test -w @vp/web
+          npm run build -w @vp/web
+
+      - name: Fixture recordings validate
+        run: npx tsx fixtures/validate.ts

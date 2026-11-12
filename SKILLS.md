@@ -4,6 +4,18 @@ This project demonstrates practical software engineering skills used in producti
 
 ---
 
+# AI Engineering
+
+- Vision model classification and extraction behind one interface
+- Structured output validated with Zod, retried when invalid
+- Every value carries a confidence and a bounding box back to its source
+- Human-in-the-loop confirmation below a threshold
+- Deterministic rules engine makes decisions; the model never sets the score
+- Recorded model responses for offline tests and demos
+- Token and cost accounting per document
+
+---
+
 # Backend
 
 ## NestJS
@@ -105,6 +117,7 @@ This project demonstrates practical software engineering skills used in producti
 - Tailwind CSS
 - Responsive Design
 - Dark Mode Ready
+- Framer Motion (documents sorting into place, trust score ring)
 
 ---
 
@@ -125,9 +138,9 @@ This project demonstrates practical software engineering skills used in producti
 
 Backend
 
-- Jest
-- Unit Testing
-- Integration Testing
+- Jest (API), Vitest (rules engine)
+- Unit Testing (rules, normalization, CIDB limits, trust score)
+- Integration Testing (upload to findings pipeline)
 - End-to-End Testing
 
 Frontend
@@ -195,11 +208,12 @@ Frontend
 
 - Dependency Injection
 - Repository Pattern
-- Strategy Pattern (Difficulty Generation)
-- Factory Pattern (Puzzle Generator)
-- Builder Pattern (Leaderboard Response)
-- Singleton Pattern (Configuration)
-- Adapter Pattern (Database Integration)
+- Strategy Pattern (`ExtractionProvider`: Anthropic vision model or recorded mock)
+- Factory Pattern (storage adapter: S3-compatible or local disk)
+- Adapter Pattern (Redis pub/sub bridge between the worker and the Socket.IO gateway)
+- Pipeline / State Machine (document processing states)
+- Singleton Pattern (validated configuration)
+- Pure Functions (rules engine: same input, same findings and score)
 
 ---
 
@@ -220,4 +234,4 @@ Frontend
 
 # Project Outcome
 
-This project showcases the ability to build a secure, scalable, and maintainable full-stack application following modern software engineering practices. It demonstrates expertise in backend development with NestJS, frontend development with Next.js, relational database design using PostgreSQL, secure authentication, clean architecture, and production-ready deployment workflows.
+This project showcases the ability to build a secure, scalable, and maintainable full-stack application following modern software engineering practices. It demonstrates expertise in backend development with NestJS, frontend development with Next.js, relational database design using PostgreSQL, secure authentication, explainable AI document extraction with human confirmation, a deterministic rules engine, clean architecture, and production-ready deployment workflows.

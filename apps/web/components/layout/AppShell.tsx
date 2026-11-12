@@ -49,7 +49,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const items = NAV[area];
 
   const nav = (
-    <nav className="flex flex-1 flex-col gap-0.5 px-3">
+    <nav className="flex min-h-0 flex-1 flex-col gap-0.5 overflow-y-auto px-3">
       {items.map((item) => {
         const active = item.exact ? pathname === item.href : pathname.startsWith(item.href);
         const Icon = item.icon;
@@ -74,7 +74,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen">
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-line bg-panel lg:flex">
+      <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col border-r border-line bg-panel lg:flex">
         <div className="px-5 py-5">
           <Logo />
         </div>

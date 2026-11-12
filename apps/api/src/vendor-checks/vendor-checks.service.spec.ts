@@ -19,6 +19,7 @@ describe('VendorChecksService decisions', () => {
     vendorCheck: { findUnique: jest.fn(async () => ({ ...check })), update: jest.fn(async () => check) },
     documentField: { count: jest.fn(async () => 0) },
     document: { findMany: jest.fn(async () => []) },
+    vendorRating: { findUnique: jest.fn(async () => null) },
     organization: { findFirst: jest.fn() },
   };
   const settings = { confidenceThreshold: 0.85, expiryWarningDays: 30, minLiabilityCoverage: null, approverThreshold: 5_000_000, ruleWeights: {} };

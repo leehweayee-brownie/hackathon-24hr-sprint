@@ -101,6 +101,8 @@ model Organization {
   accessRequestsAsSupplier AccessRequest[] @relation("SupplierAccessRequests")
   auditLogs              AuditLog[]
   aiUsage                AiUsage[]
+  ratingsGiven           VendorRating[]  @relation("BuyerRatings")
+  ratingsReceived        VendorRating[]  @relation("SupplierRatings")
 
   @@map("organizations")
 }
@@ -130,6 +132,7 @@ model User {
   invitesSent   Invite[]
   accessRequests AccessRequest[]
   auditLogs     AuditLog[]
+  ratings       VendorRating[]
 
   @@index([organizationId])
   @@map("users")
@@ -250,10 +253,33 @@ model VendorCheck {
   decidedBy User?        @relation("DecidedBy", fields: [decidedById], references: [id], onDelete: SetNull)
   createdBy User         @relation("CheckCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
   findings  Finding[]
+  rating    VendorRating?
 
   @@index([buyerId, status])
   @@index([supplierId])
   @@map("vendor_checks")
+}
+
+/// Post-job rating a buyer gives an approved vendor. Feeds Vendor Match ranking ("rated 4.6 from 3 past jobs").
+model VendorRating {
+  id            String   @id @default(uuid())
+  vendorCheckId String   @unique @map("vendor_check_id")
+  buyerId       String   @map("buyer_id")
+  supplierId    String   @map("supplier_id")
+  /// 1 to 5 stars.
+  score         Int
+  comment       String?
+  ratedById     String   @map("rated_by")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @default(now()) @updatedAt @map("updated_at")
+
+  vendorCheck VendorCheck  @relation(fields: [vendorCheckId], references: [id], onDelete: Cascade)
+  buyer       Organization @relation("BuyerRatings", fields: [buyerId], references: [id], onDelete: Cascade)
+  supplier    Organization @relation("SupplierRatings", fields: [supplierId], references: [id], onDelete: Cascade)
+  ratedBy     User         @relation(fields: [ratedById], references: [id], onDelete: Cascade)
+
+  @@index([supplierId])
+  @@map("vendor_ratings")
 }
 
 model Finding {

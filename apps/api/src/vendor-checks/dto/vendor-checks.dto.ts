@@ -1,6 +1,6 @@
 import { ApiProperty, ApiPropertyOptional } from '@nestjs/swagger';
 import { DocType } from '@vp/shared';
-import { ArrayUnique, IsArray, IsEnum, IsIn, IsNumber, IsOptional, IsString, IsUUID, MaxLength, Min, MinLength } from 'class-validator';
+import { ArrayUnique, IsArray, IsEnum, IsIn, IsInt, IsNumber, IsOptional, IsString, IsUUID, Max, MaxLength, Min, MinLength } from 'class-validator';
 import { PaginationQuery } from '../../common/dto/pagination';
 
 export class CreateVendorCheckDto {
@@ -43,6 +43,15 @@ export class RequestInfoDto {
   get text(): string {
     return (this.message ?? this.note ?? '').trim();
   }
+}
+
+/** Post-job rating for an approved vendor (feeds Vendor Match ranking). */
+export class RateVendorDto {
+  @ApiProperty({ minimum: 1, maximum: 5, example: 5 }) @IsInt() @Min(1) @Max(5)
+  score: number;
+
+  @ApiPropertyOptional({ example: 'Finished on time, tidy site.' }) @IsOptional() @IsString() @MaxLength(1000)
+  comment?: string;
 }
 
 export class ListSuppliersQuery {

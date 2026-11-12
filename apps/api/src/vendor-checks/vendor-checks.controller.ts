@@ -3,7 +3,7 @@ import { ApiBearerAuth, ApiOperation, ApiTags } from '@nestjs/swagger';
 import { CurrentUser } from '../common/decorators/current-user.decorator';
 import type { RequestUser } from '../common/types';
 import { AccessRequestsService } from './access-requests.service';
-import { CreateAccessRequestDto, CreateVendorCheckDto, DecisionDto, ListSuppliersQuery, ListVendorChecksQuery, RequestInfoDto, RespondAccessRequestDto, UpdateVendorCheckDto } from './dto/vendor-checks.dto';
+import { CreateAccessRequestDto, CreateVendorCheckDto, DecisionDto, ListSuppliersQuery, ListVendorChecksQuery, RateVendorDto, RequestInfoDto, RespondAccessRequestDto, UpdateVendorCheckDto } from './dto/vendor-checks.dto';
 import { VendorChecksService } from './vendor-checks.service';
 
 @ApiTags('vendor-checks')
@@ -47,6 +47,12 @@ export class VendorChecksController {
   @Post(':id/reject')
   reject(@CurrentUser() user: RequestUser, @Param('id', ParseUUIDPipe) id: string, @Body() dto: DecisionDto) {
     return this.checks.reject(user, id, dto);
+  }
+
+  @Post(':id/rating')
+  @ApiOperation({ summary: 'Rate an approved vendor after the job; ratings rank future Vendor Match shortlists' })
+  rate(@CurrentUser() user: RequestUser, @Param('id', ParseUUIDPipe) id: string, @Body() dto: RateVendorDto) {
+    return this.checks.rate(user, id, dto);
   }
 }
 

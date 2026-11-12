@@ -10,7 +10,7 @@ import { PrismaService } from '../database/prisma.service';
 import { toDocumentView, toFieldView } from '../documents/document.mapper';
 import { NotificationsService } from '../notifications/notifications.service';
 import { OrganizationsService } from '../organizations/organizations.service';
-import type { CreateVendorCheckDto, DecisionDto, ListVendorChecksQuery, RequestInfoDto, UpdateVendorCheckDto } from './dto/vendor-checks.dto';
+import type { CreateVendorCheckDto, DecisionDto, ListVendorChecksQuery, RateVendorDto, RequestInfoDto, UpdateVendorCheckDto } from './dto/vendor-checks.dto';
 
 type CheckRow = VendorCheck & { supplier: { name: string }; decidedBy?: { name: string } | null };
 
@@ -68,11 +68,12 @@ export class VendorChecksService {
 
   async get(user: RequestUser, id: string): Promise<VendorCheckView> {
     const check = await this.load(user, id);
-    const [buyerSettings, ruleDocs, findings, docs] = await Promise.all([
+    const [buyerSettings, ruleDocs, findings, docs, rating] = await Promise.all([
       this.organizations.resolveSettings(check.buyerId),
       this.crossCheck.buildRuleDocuments(check.supplierId),
       this.crossCheck.findings(check.supplierId, check.id),
       this.prisma.document.findMany({ where: { supplierId: check.supplierId, supersededById: null }, include: { fields: { include: { confirmedBy: { select: { id: true, name: true } } } } }, orderBy: { createdAt: 'desc' } }),
+      this.prisma.vendorRating.findUnique({ where: { vendorCheckId: check.id }, include: { ratedBy: { select: { name: true } } } }),
     ]);
     const threshold = buyerSettings.confidenceThreshold;
     const required = new Set(check.requiredDocTypes as DocType[]);
@@ -86,7 +87,24 @@ export class VendorChecksService {
       timeline: this.crossCheck.timeline(ruleDocs, buyerSettings),
       documents: docs.map((d) => toDocumentView(d, threshold)),
       lowConfidenceFields,
+      rating: rating ? { score: rating.score, comment: rating.comment, ratedByName: rating.ratedBy.name, createdAt: rating.createdAt.toISOString() } : null,
     };
+  }
+
+  /** Rate an approved vendor after the job. One rating per check; rating again updates it. */
+  async rate(user: RequestUser, id: string, dto: RateVendorDto): Promise<VendorCheckView> {
+    this.assertBuyer(user);
+    const check = await this.load(user, id);
+    if (check.buyerId !== user.organizationId && user.role !== UserRole.ADMIN) throw AppException.forbidden('Only the buyer who ran this check can rate it');
+    if (check.status !== VendorCheckStatus.APPROVED) throw AppException.conflict('Only approved vendors can be rated');
+    const comment = dto.comment?.trim() || null;
+    await this.prisma.vendorRating.upsert({
+      where: { vendorCheckId: id },
+      create: { vendorCheckId: id, buyerId: check.buyerId, supplierId: check.supplierId, score: dto.score, comment, ratedById: user.id },
+      update: { score: dto.score, comment, ratedById: user.id },
+    });
+    await this.audit.log({ actorId: user.id, organizationId: user.organizationId, action: 'vendor_check.rate', entity: 'vendor_check', entityId: id, metadata: { score: dto.score } });
+    return this.get(user, id);
   }
 
   async update(user: RequestUser, id: string, dto: UpdateVendorCheckDto): Promise<VendorCheckView> {

@@ -12,6 +12,7 @@
     "db:generate": "prisma generate",
     "db:seed": "tsx prisma/seed.ts",
     "db:seed:match": "tsx prisma/seed-vendor-match.ts",
+    "db:seed:suppliers": "tsx prisma/seed-suppliers.ts",
     "db:reset": "prisma migrate reset --force",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "jest",

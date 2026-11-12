@@ -91,12 +91,12 @@ async function renderPdf(title: string, company: string, fields: Record<string, 
   return Buffer.from(await pdf.save());
 }
 
-interface DocSpec {
+export interface DocSpec {
   type: DocType;
   fields: Record<string, string>;
 }
 
-interface SupplierSpec {
+export interface SupplierSpec {
   name: string;
   registrationNo: string;
   owner: { name: string; email: string };
@@ -106,18 +106,19 @@ interface SupplierSpec {
   pastJobs: Array<{ title: string; value: number; score: number; comment: string; monthsAgo: number }>;
 }
 
-function suppliers(): SupplierSpec[] {
+/** Document builders, shared with seed-suppliers.ts. */
+export const docs = (() => {
   const ssm = (name: string, reg: string, address: string, inc: string): DocSpec => ({
     type: DocType.SSM,
     fields: { company_name: name.toUpperCase(), registration_no: reg, incorporation_date: inc, registered_address: address, company_status: 'EXISTING', issuer: 'Suruhanjaya Syarikat Malaysia' },
   });
-  const cidb = (name: string, reg: string, grade: string, expiry: string): DocSpec => ({
+  const cidb = (name: string, reg: string, grade: string, expiry: string, categories = 'B, CE'): DocSpec => ({
     type: DocType.CIDB,
-    fields: { company_name: name, cidb_registration_no: `0120${reg.slice(0, 6)}-SL${reg.slice(-4)}`, registration_no: reg, grade, categories: 'B, CE', issue_date: monthsAgo(10), expiry_date: expiry, issuer: 'CIDB Malaysia' },
+    fields: { company_name: name, cidb_registration_no: `0120${reg.slice(0, 6)}-SL${reg.slice(-4)}`, registration_no: reg, grade, categories, issue_date: monthsAgo(10), expiry_date: expiry, issuer: 'CIDB Malaysia' },
   });
-  const pl = (name: string, cover: string, expiry: string): DocSpec => ({
+  const pl = (name: string, cover: string, expiry: string, issuer = 'Etiqa General Insurance Berhad'): DocSpec => ({
     type: DocType.PUBLIC_LIABILITY,
-    fields: { issuer: 'Etiqa General Insurance Berhad', policy_no: `PL-${randomBytes(3).toString('hex').toUpperCase()}`, insured_party: name, company_name: name, coverage_amount: cover, issue_date: monthsAgo(2), expiry_date: expiry },
+    fields: { issuer, policy_no: `PL-${randomBytes(3).toString('hex').toUpperCase()}`, insured_party: name, company_name: name, coverage_amount: cover, issue_date: monthsAgo(2), expiry_date: expiry },
   });
   const wc = (name: string, expiry: string): DocSpec => ({
     type: DocType.WORKMEN_COMP,
@@ -131,11 +132,17 @@ function suppliers(): SupplierSpec[] {
     type: DocType.ISO,
     fields: { issuer: 'SIRIM QAS International', company_name: name, standard: 'ISO 9001:2015', certificate_no: `QMS ${randomBytes(2).toString('hex').toUpperCase()}`, issue_date: monthsAgo(14), expiry_date: expiry },
   });
-  const bank = (name: string, reg: string): DocSpec => ({
+  const bank = (name: string, reg: string, issuer = 'Maybank Islamic Berhad'): DocSpec => ({
     type: DocType.BANK_REFERENCE,
-    fields: { issuer: 'Maybank Islamic Berhad', company_name: name, registration_no: reg, account_since: '2012-03-01', conduct: 'Satisfactory', issue_date: monthsAgo(1) },
+    fields: { issuer, company_name: name, registration_no: reg, account_since: '2012-03-01', conduct: 'Satisfactory', issue_date: monthsAgo(1) },
   });
+  return { ssm, cidb, pl, wc, tax, isoCert, bank };
+})();
 
+export { monthsAhead, monthsAgo };
+
+function suppliers(): SupplierSpec[] {
+  const { ssm, cidb, pl, wc, tax, isoCert, bank } = docs;
   return [
     {
       name: 'Teguh Struktur Sdn Bhd',
@@ -209,7 +216,8 @@ function suppliers(): SupplierSpec[] {
 
 const prisma = new PrismaClient();
 
-async function main(): Promise<void> {
+/** Adds each supplier with its documents (stored as PDFs), findings, passport and rated past jobs. Skips existing ones. */
+export async function seedSuppliers(specs: SupplierSpec[]): Promise<void> {
   await loadEnv();
   const buyer = await prisma.organization.findFirst({ where: { type: OrganizationType.BUYER, name: 'Northbridge Infrastructure Bhd' } });
   const buyerUser = buyer ? await prisma.user.findFirst({ where: { organizationId: buyer.id, role: UserRole.BUYER_PROCUREMENT } }) : null;
@@ -217,7 +225,7 @@ async function main(): Promise<void> {
   if (!buyer || !buyerUser || !approver) throw new Error('Run the main seed first (npm run db:seed): Northbridge and its users are missing.');
 
   const password = await argon2.hash(PASSWORD);
-  for (const spec of suppliers()) {
+  for (const spec of specs) {
     if (await prisma.organization.findFirst({ where: { name: spec.name, type: OrganizationType.SUPPLIER } })) {
       console.log(`· ${spec.name} already exists, skipped`);
       continue;
@@ -314,11 +322,15 @@ async function main(): Promise<void> {
   console.log(`\nSupplier logins use password ${PASSWORD}.`);
 }
 
-main()
-  .catch((e) => {
-    console.error(e);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+export function run(specs: () => SupplierSpec[]): void {
+  seedSuppliers(specs())
+    .catch((e) => {
+      console.error(e);
+      process.exit(1);
+    })
+    .finally(async () => {
+      await prisma.$disconnect();
+    });
+}
+
+if (require.main === module) run(suppliers);

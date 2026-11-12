@@ -1,0 +1,9 @@
+{
+  "fileName": "unreadable-scan.png",
+  "classification": {
+    "docType": "OTHER",
+    "confidence": 0.15,
+    "reason": "Image is blank; no readable text"
+  },
+  "fields": []
+}

@@ -1,0 +1,82 @@
+{
+  "fileName": "02-ssm-einfo-profile.pdf",
+  "classification": {
+    "docType": "SSM",
+    "confidence": 0.93,
+    "reason": "SSM e-Info company profile printout with registration particulars and directors"
+  },
+  "fields": [
+    {
+      "key": "issuer",
+      "rawValue": "Suruhanjaya Syarikat Malaysia",
+      "confidence": 0.88,
+      "page": 1,
+      "bbox": {
+        "x": 0.1344,
+        "y": 0.0665,
+        "width": 0.45,
+        "height": 0.0131
+      }
+    },
+    {
+      "key": "company_name",
+      "rawValue": "BINA JAYA SDN BHD",
+      "confidence": 0.97,
+      "page": 1,
+      "bbox": {
+        "x": 0.3276,
+        "y": 0.1878,
+        "width": 0.1379,
+        "height": 0.0116
+      }
+    },
+    {
+      "key": "registration_no",
+      "rawValue": "201501023456 (1156789-K)",
+      "confidence": 0.96,
+      "page": 1,
+      "bbox": {
+        "x": 0.3276,
+        "y": 0.2139,
+        "width": 0.1786,
+        "height": 0.0116
+      }
+    },
+    {
+      "key": "incorporation_date",
+      "rawValue": "15 June 2015",
+      "confidence": 0.95,
+      "page": 1,
+      "bbox": {
+        "x": 0.3276,
+        "y": 0.2401,
+        "width": 0.0862,
+        "height": 0.0116
+      }
+    },
+    {
+      "key": "company_status",
+      "rawValue": "EXISTING",
+      "confidence": 0.93,
+      "page": 1,
+      "bbox": {
+        "x": 0.3276,
+        "y": 0.2923,
+        "width": 0.0667,
+        "height": 0.0116
+      }
+    },
+    {
+      "key": "registered_address",
+      "rawValue": "No. 12, Jalan Industri 3/4, Taman Perindustrian Selatan, 43300 Seri Kembangan, Selangor",
+      "confidence": 0.9,
+      "page": 1,
+      "bbox": {
+        "x": 0.3276,
+        "y": 0.3185,
+        "width": 0.5701,
+        "height": 0.0116
+      }
+    }
+  ]
+}

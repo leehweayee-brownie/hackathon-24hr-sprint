@@ -1,0 +1,94 @@
+{
+  "fileName": "mw-04-socso-coverage.pdf",
+  "classification": {
+    "docType": "WORKMEN_COMP",
+    "confidence": 0.92,
+    "reason": "PERKESO employer coverage certificate (Sijil Perlindungan Majikan) with coverage period"
+  },
+  "fields": [
+    {
+      "key": "issuer",
+      "rawValue": "PERTUBUHAN KESELAMATAN SOSIAL (PERKESO)",
+      "confidence": 0.93,
+      "page": 1,
+      "bbox": {
+        "x": 0.2524,
+        "y": 0.1188,
+        "width": 0.4953,
+        "height": 0.0164
+      }
+    },
+    {
+      "key": "policy_no",
+      "rawValue": "B4040067890A",
+      "confidence": 0.94,
+      "page": 1,
+      "bbox": {
+        "x": 0.504,
+        "y": 0.2791,
+        "width": 0.1294,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "company_name",
+      "rawValue": "MEGA WIRA CONSTRUCTION SDN BHD",
+      "confidence": 0.96,
+      "page": 1,
+      "bbox": {
+        "x": 0.504,
+        "y": 0.31,
+        "width": 0.3513,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "insured_party",
+      "rawValue": "MEGA WIRA CONSTRUCTION SDN BHD",
+      "confidence": 0.9,
+      "page": 1,
+      "bbox": {
+        "x": 0.504,
+        "y": 0.31,
+        "width": 0.3513,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "issue_date",
+      "rawValue": "{{today-100d:dd/MM/yyyy}}",
+      "confidence": 0.93,
+      "page": 1,
+      "bbox": {
+        "x": 0.504,
+        "y": 0.4989,
+        "width": 0.0925,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "expiry_date",
+      "rawValue": "{{today+400d:dd/MM/yyyy}}",
+      "confidence": 0.94,
+      "page": 1,
+      "bbox": {
+        "x": 0.504,
+        "y": 0.5298,
+        "width": 0.0925,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "coverage_amount",
+      "rawValue": "RM 1,000,000.00",
+      "confidence": 0.93,
+      "page": 1,
+      "bbox": {
+        "x": 0.504,
+        "y": 0.5678,
+        "width": 0.1418,
+        "height": 0.015
+      }
+    }
+  ]
+}

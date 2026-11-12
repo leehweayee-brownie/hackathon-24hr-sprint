@@ -1,0 +1,94 @@
+{
+  "fileName": "08-iso9001.pdf",
+  "classification": {
+    "docType": "ISO",
+    "confidence": 0.95,
+    "reason": "ISO 9001:2015 certificate of registration from a certification body"
+  },
+  "fields": [
+    {
+      "key": "issuer",
+      "rawValue": "Nusantara Certification Services Sdn Bhd",
+      "confidence": 0.94,
+      "page": 1,
+      "bbox": {
+        "x": 0.2837,
+        "y": 0.1283,
+        "width": 0.4327,
+        "height": 0.0178
+      }
+    },
+    {
+      "key": "company_name",
+      "rawValue": "BINA JAYA SDN BHD",
+      "confidence": 0.97,
+      "page": 1,
+      "bbox": {
+        "x": 0.3597,
+        "y": 0.2851,
+        "width": 0.2805,
+        "height": 0.0232
+      }
+    },
+    {
+      "key": "standard",
+      "rawValue": "ISO 9001:2015",
+      "confidence": 0.98,
+      "page": 1,
+      "bbox": {
+        "x": 0.3861,
+        "y": 0.4098,
+        "width": 0.2279,
+        "height": 0.0273
+      }
+    },
+    {
+      "key": "scope",
+      "rawValue": "Provision of building and civil engineering construction services",
+      "confidence": 0.89,
+      "page": 1,
+      "bbox": {
+        "x": 0.2833,
+        "y": 0.4739,
+        "width": 0.4334,
+        "height": 0.0137
+      }
+    },
+    {
+      "key": "certificate_no",
+      "rawValue": "NCS-QMS-24-01877",
+      "confidence": 0.96,
+      "page": 1,
+      "bbox": {
+        "x": 0.4368,
+        "y": 0.5333,
+        "width": 0.1715,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "issue_date",
+      "rawValue": "{{today-400d:dd/MM/yyyy}}",
+      "confidence": 0.95,
+      "page": 1,
+      "bbox": {
+        "x": 0.4368,
+        "y": 0.5618,
+        "width": 0.0925,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "expiry_date",
+      "rawValue": "{{today+695d:dd/MM/yyyy}}",
+      "confidence": 0.96,
+      "page": 1,
+      "bbox": {
+        "x": 0.4368,
+        "y": 0.5903,
+        "width": 0.0925,
+        "height": 0.015
+      }
+    }
+  ]
+}

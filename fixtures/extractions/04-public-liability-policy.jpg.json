@@ -1,0 +1,94 @@
+{
+  "fileName": "04-public-liability-policy.jpg",
+  "classification": {
+    "docType": "PUBLIC_LIABILITY",
+    "confidence": 0.94,
+    "reason": "Scanned public liability policy schedule with limit of liability and period of insurance"
+  },
+  "fields": [
+    {
+      "key": "issuer",
+      "rawValue": "PERISAI TAKAFUL AM BERHAD",
+      "confidence": 0.93,
+      "page": 1,
+      "bbox": {
+        "x": 0.1452,
+        "y": 0.0468,
+        "width": 0.4711,
+        "height": 0.0274
+      }
+    },
+    {
+      "key": "policy_no",
+      "rawValue": "PL/2025/0098765",
+      "confidence": 0.96,
+      "page": 1,
+      "bbox": {
+        "x": 0.4194,
+        "y": 0.2052,
+        "width": 0.1979,
+        "height": 0.0192
+      }
+    },
+    {
+      "key": "insured_party",
+      "rawValue": "BINA JAYA ENGINEERING SDN BHD",
+      "confidence": 0.95,
+      "page": 1,
+      "bbox": {
+        "x": 0.4194,
+        "y": 0.2406,
+        "width": 0.3826,
+        "height": 0.0192
+      }
+    },
+    {
+      "key": "company_name",
+      "rawValue": "BINA JAYA ENGINEERING SDN BHD",
+      "confidence": 0.93,
+      "page": 1,
+      "bbox": {
+        "x": 0.4194,
+        "y": 0.2406,
+        "width": 0.3826,
+        "height": 0.0192
+      }
+    },
+    {
+      "key": "issue_date",
+      "rawValue": "{{today-342d:dd/MM/yyyy}}",
+      "confidence": 0.94,
+      "page": 1,
+      "bbox": {
+        "x": 0.4194,
+        "y": 0.3865,
+        "width": 0.1319,
+        "height": 0.0192
+      }
+    },
+    {
+      "key": "expiry_date",
+      "rawValue": "{{today+23d:dd/MM/yyyy}}",
+      "confidence": 0.95,
+      "page": 1,
+      "bbox": {
+        "x": 0.4194,
+        "y": 0.4219,
+        "width": 0.1319,
+        "height": 0.0192
+      }
+    },
+    {
+      "key": "coverage_amount",
+      "rawValue": "RM 2,000,000.00",
+      "confidence": 0.96,
+      "page": 1,
+      "bbox": {
+        "x": 0.0887,
+        "y": 0.4983,
+        "width": 0.2827,
+        "height": 0.0274
+      }
+    }
+  ]
+}

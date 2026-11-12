@@ -1,0 +1,94 @@
+{
+  "fileName": "mw-03-public-liability-policy.pdf",
+  "classification": {
+    "docType": "PUBLIC_LIABILITY",
+    "confidence": 0.96,
+    "reason": "Public liability policy schedule with limit of liability and period of insurance"
+  },
+  "fields": [
+    {
+      "key": "issuer",
+      "rawValue": "Amanah General Insurance Berhad",
+      "confidence": 0.94,
+      "page": 1,
+      "bbox": {
+        "x": 0.1344,
+        "y": 0.0428,
+        "width": 0.4201,
+        "height": 0.0202
+      }
+    },
+    {
+      "key": "policy_no",
+      "rawValue": "PLI-2026-0412233",
+      "confidence": 0.97,
+      "page": 1,
+      "bbox": {
+        "x": 0.3612,
+        "y": 0.1666,
+        "width": 0.1391,
+        "height": 0.0137
+      }
+    },
+    {
+      "key": "insured_party",
+      "rawValue": "MEGA WIRA CONSTRUCTION SDN BHD",
+      "confidence": 0.97,
+      "page": 1,
+      "bbox": {
+        "x": 0.3612,
+        "y": 0.1951,
+        "width": 0.3169,
+        "height": 0.0137
+      }
+    },
+    {
+      "key": "company_name",
+      "rawValue": "MEGA WIRA CONSTRUCTION SDN BHD",
+      "confidence": 0.95,
+      "page": 1,
+      "bbox": {
+        "x": 0.3612,
+        "y": 0.1951,
+        "width": 0.3169,
+        "height": 0.0137
+      }
+    },
+    {
+      "key": "issue_date",
+      "rawValue": "{{today-65d:dd/MM/yyyy}}",
+      "confidence": 0.96,
+      "page": 1,
+      "bbox": {
+        "x": 0.3612,
+        "y": 0.2806,
+        "width": 0.0841,
+        "height": 0.0137
+      }
+    },
+    {
+      "key": "expiry_date",
+      "rawValue": "{{today+300d:dd/MM/yyyy}}",
+      "confidence": 0.97,
+      "page": 1,
+      "bbox": {
+        "x": 0.3612,
+        "y": 0.3091,
+        "width": 0.0841,
+        "height": 0.0137
+      }
+    },
+    {
+      "key": "coverage_amount",
+      "rawValue": "RM 5,000,000.00",
+      "confidence": 0.97,
+      "page": 1,
+      "bbox": {
+        "x": 0.3612,
+        "y": 0.3376,
+        "width": 0.1289,
+        "height": 0.0137
+      }
+    }
+  ]
+}

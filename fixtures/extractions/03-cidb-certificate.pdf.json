@@ -1,0 +1,106 @@
+{
+  "fileName": "03-cidb-certificate.pdf",
+  "classification": {
+    "docType": "CIDB",
+    "confidence": 0.96,
+    "reason": "CIDB \"Perakuan Pendaftaran Kontraktor\" with grade and category table"
+  },
+  "fields": [
+    {
+      "key": "issuer",
+      "rawValue": "LEMBAGA PEMBANGUNAN INDUSTRI PEMBINAAN MALAYSIA",
+      "confidence": 0.92,
+      "page": 1,
+      "bbox": {
+        "x": 0.2233,
+        "y": 0.1188,
+        "width": 0.5533,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "cidb_registration_no",
+      "rawValue": "0120150612-SL012345",
+      "confidence": 0.95,
+      "page": 1,
+      "bbox": {
+        "x": 0.42,
+        "y": 0.2732,
+        "width": 0.1942,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "company_name",
+      "rawValue": "BINA JAYA SDN BHD",
+      "confidence": 0.97,
+      "page": 1,
+      "bbox": {
+        "x": 0.42,
+        "y": 0.3041,
+        "width": 0.1845,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "registration_no",
+      "rawValue": "201501023456",
+      "confidence": 0.94,
+      "page": 1,
+      "bbox": {
+        "x": 0.42,
+        "y": 0.335,
+        "width": 0.1233,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "grade",
+      "rawValue": "G5",
+      "confidence": 0.98,
+      "page": 1,
+      "bbox": {
+        "x": 0.1344,
+        "y": 0.4573,
+        "width": 0.0583,
+        "height": 0.0355
+      }
+    },
+    {
+      "key": "categories",
+      "rawValue": "B, CE",
+      "confidence": 0.9,
+      "page": 1,
+      "bbox": {
+        "x": 0.4284,
+        "y": 0.4702,
+        "width": 0.1008,
+        "height": 0.038
+      }
+    },
+    {
+      "key": "issue_date",
+      "rawValue": "{{today-300d:dd/MM/yyyy}}",
+      "confidence": 0.95,
+      "page": 1,
+      "bbox": {
+        "x": 0.42,
+        "y": 0.5238,
+        "width": 0.0925,
+        "height": 0.015
+      }
+    },
+    {
+      "key": "expiry_date",
+      "rawValue": "{{today+425d:dd/MM/yyyy}}",
+      "confidence": 0.96,
+      "page": 1,
+      "bbox": {
+        "x": 0.42,
+        "y": 0.5547,
+        "width": 0.0925,
+        "height": 0.015
+      }
+    }
+  ]
+}

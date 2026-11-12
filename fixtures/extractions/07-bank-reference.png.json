@@ -1,0 +1,82 @@
+{
+  "fileName": "07-bank-reference.png",
+  "classification": {
+    "docType": "BANK_REFERENCE",
+    "confidence": 0.9,
+    "reason": "Scanned banker's reference letter on bank letterhead"
+  },
+  "fields": [
+    {
+      "key": "issuer",
+      "rawValue": "BANK MAJU BERHAD",
+      "confidence": 0.92,
+      "page": 1,
+      "bbox": {
+        "x": 0.1411,
+        "y": 0.0479,
+        "width": 0.2865,
+        "height": 0.026
+      }
+    },
+    {
+      "key": "issue_date",
+      "rawValue": "{{today-15d:d MMMM yyyy}}",
+      "confidence": 0.91,
+      "page": 1,
+      "bbox": {
+        "x": 0.1613,
+        "y": 0.1368,
+        "width": 0.1717,
+        "height": 0.0178
+      }
+    },
+    {
+      "key": "company_name",
+      "rawValue": "BINA JAYA SDN BHD",
+      "confidence": 0.94,
+      "page": 1,
+      "bbox": {
+        "x": 0.0726,
+        "y": 0.2474,
+        "width": 0.2082,
+        "height": 0.0178
+      }
+    },
+    {
+      "key": "registration_no",
+      "rawValue": "1156789-K",
+      "confidence": 0.9,
+      "page": 1,
+      "bbox": {
+        "x": 0.2419,
+        "y": 0.2702,
+        "width": 0.1102,
+        "height": 0.0178
+      }
+    },
+    {
+      "key": "account_since",
+      "rawValue": "10 March 2016",
+      "confidence": 0.66,
+      "page": 1,
+      "bbox": {
+        "x": 0.133,
+        "y": 0.3649,
+        "width": 0.147,
+        "height": 0.0164
+      }
+    },
+    {
+      "key": "conduct",
+      "rawValue": "satisfactorily",
+      "confidence": 0.9,
+      "page": 1,
+      "bbox": {
+        "x": 0.0726,
+        "y": 0.3854,
+        "width": 0.1583,
+        "height": 0.0164
+      }
+    }
+  ]
+}

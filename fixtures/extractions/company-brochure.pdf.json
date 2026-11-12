@@ -1,0 +1,34 @@
+{
+  "fileName": "company-brochure.pdf",
+  "classification": {
+    "docType": "OTHER",
+    "confidence": 0.9,
+    "reason": "Marketing brochure; not a compliance document"
+  },
+  "fields": [
+    {
+      "key": "title",
+      "rawValue": "Building Malaysia's Future",
+      "confidence": 0.88,
+      "page": 1,
+      "bbox": {
+        "x": 0.0672,
+        "y": 0.0831,
+        "width": 0.5931,
+        "height": 0.0382
+      }
+    },
+    {
+      "key": "company_name",
+      "rawValue": "Bina Jaya Sdn Bhd",
+      "confidence": 0.86,
+      "page": 1,
+      "bbox": {
+        "x": 0.0672,
+        "y": 0.1366,
+        "width": 0.1842,
+        "height": 0.0178
+      }
+    }
+  ]
+}

@@ -1,0 +1,82 @@
+{
+  "fileName": "01-ssm-form9.pdf",
+  "classification": {
+    "docType": "SSM",
+    "confidence": 0.97,
+    "reason": "SSM certificate of incorporation header, company number and Registrar signature block"
+  },
+  "fields": [
+    {
+      "key": "issuer",
+      "rawValue": "SURUHANJAYA SYARIKAT MALAYSIA",
+      "confidence": 0.9,
+      "page": 1,
+      "bbox": {
+        "x": 0.3036,
+        "y": 0.0831,
+        "width": 0.3928,
+        "height": 0.0178
+      }
+    },
+    {
+      "key": "company_name",
+      "rawValue": "BINA JAYA SDN BHD",
+      "confidence": 0.98,
+      "page": 1,
+      "bbox": {
+        "x": 0.3515,
+        "y": 0.3326,
+        "width": 0.297,
+        "height": 0.0246
+      }
+    },
+    {
+      "key": "registration_no",
+      "rawValue": "201501023456 (1156789-K)",
+      "confidence": 0.97,
+      "page": 1,
+      "bbox": {
+        "x": 0.3628,
+        "y": 0.3967,
+        "width": 0.2744,
+        "height": 0.0178
+      }
+    },
+    {
+      "key": "incorporation_date",
+      "rawValue": "15 June 2015",
+      "confidence": 0.96,
+      "page": 1,
+      "bbox": {
+        "x": 0.4322,
+        "y": 0.4811,
+        "width": 0.1355,
+        "height": 0.0178
+      }
+    },
+    {
+      "key": "registered_address",
+      "rawValue": "No. 12, Jalan Industri 3/4, Taman Perindustrian Selatan, 43300 Seri Kembangan, Selangor",
+      "confidence": 0.91,
+      "page": 1,
+      "bbox": {
+        "x": 0.1512,
+        "y": 0.601,
+        "width": 0.5,
+        "height": 0.0499
+      }
+    },
+    {
+      "key": "company_status",
+      "rawValue": "EXISTING",
+      "confidence": 0.94,
+      "page": 1,
+      "bbox": {
+        "x": 0.4536,
+        "y": 0.6794,
+        "width": 0.0784,
+        "height": 0.0137
+      }
+    }
+  ]
+}

@@ -2,13 +2,11 @@
   "name": "@vp/api",
   "version": "0.1.0",
   "private": true,
-  "description": "Vendor Passport API and document processing worker (NestJS)",
+  "description": "Vendor Passport API with background document processing (NestJS)",
   "scripts": {
     "build": "prisma generate && nest build",
     "dev": "nest start --watch",
-    "dev:worker": "nest start --watch --entryFile worker",
     "start": "node dist/main.js",
-    "start:worker": "node dist/worker.js",
     "db:migrate": "prisma migrate dev",
     "db:deploy": "prisma migrate deploy",
     "db:generate": "prisma generate",
@@ -26,7 +24,6 @@
     "@anthropic-ai/sdk": "^1.8.0",
     "@aws-sdk/client-s3": "^3.700.0",
     "@aws-sdk/s3-request-presigner": "^3.700.0",
-    "@nestjs/bullmq": "^11.0.0",
     "@nestjs/common": "^11.0.0",
     "@nestjs/config": "^4.0.0",
     "@nestjs/core": "^11.0.0",
@@ -34,7 +31,6 @@
     "@nestjs/passport": "^11.0.0",
     "@nestjs/platform-express": "^11.0.0",
     "@nestjs/platform-socket.io": "^11.0.0",
-    "@nestjs/schedule": "^6.0.0",
     "@nestjs/swagger": "^11.0.0",
     "@nestjs/throttler": "^6.0.0",
     "@nestjs/websockets": "^11.0.0",
@@ -42,7 +38,6 @@
     "@vp/rules": "0.1.0",
     "@vp/shared": "0.1.0",
     "argon2": "^0.44.0",
-    "bullmq": "^5.50.0",
     "class-transformer": "^0.5.1",
     "class-validator": "^0.14.1",
     "file-type": "^16.5.4",
@@ -81,11 +76,19 @@
     "typescript": "^5.6.0"
   },
   "jest": {
-    "moduleFileExtensions": ["js", "json", "ts"],
+    "moduleFileExtensions": [
+      "js",
+      "json",
+      "ts"
+    ],
     "rootDir": "src",
     "testRegex": ".*\\.spec\\.ts$",
-    "transform": { "^.+\\.(t|j)s$": "ts-jest" },
-    "collectCoverageFrom": ["**/*.(t|j)s"],
+    "transform": {
+      "^.+\\.(t|j)s$": "ts-jest"
+    },
+    "collectCoverageFrom": [
+      "**/*.(t|j)s"
+    ],
     "coverageDirectory": "../coverage",
     "testEnvironment": "node"
   }

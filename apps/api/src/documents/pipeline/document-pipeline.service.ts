@@ -1,27 +1,26 @@
-import { Processor, WorkerHost } from '@nestjs/bullmq';
-import { Logger } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { DocType, DocumentStatus, SOCKET_EVENTS, docTypeLabel } from '@vp/shared';
-import { Job, UnrecoverableError } from 'bullmq';
-import { AppException } from '../common/errors/app.exception';
-import { CrossCheckService } from '../cross-check/cross-check.service';
-import { PrismaService } from '../database/prisma.service';
-import { toFieldView } from '../documents/document.mapper';
-import { ExtractionService } from '../extraction/extraction.service';
-import { PagePrepService } from '../extraction/page-prep.service';
-import { OrganizationsService } from '../organizations/organizations.service';
-import { RealtimePublisher } from '../realtime/realtime.publisher';
-import { RemindersService } from '../reminders/reminders.service';
-import { StorageService } from '../storage/storage.service';
-import { DOCUMENTS_QUEUE, ProcessDocumentJob } from './documents.queue';
+import { AppException } from '../../common/errors/app.exception';
+import { CrossCheckService } from '../../cross-check/cross-check.service';
+import { PrismaService } from '../../database/prisma.service';
+import { ExtractionService } from '../../extraction/extraction.service';
+import { PagePrepService } from '../../extraction/page-prep.service';
+import { OrganizationsService } from '../../organizations/organizations.service';
+import { RealtimePublisher } from '../../realtime/realtime.publisher';
+import { RemindersService } from '../../reminders/reminders.service';
+import { StorageService } from '../../storage/storage.service';
+import { toFieldView } from '../document.mapper';
 
 const PROGRESS = { CONVERTING: 10, CLASSIFYING: 35, EXTRACTING: 60, DONE: 100 } as const;
 
 /**
- * UPLOADED → CONVERTING → CLASSIFYING → EXTRACTING → NEEDS_REVIEW | VERIFIED, FAILED on error (3 attempts).
+ * The document pipeline, run inside the API process after upload:
+ * UPLOADED → CONVERTING → CLASSIFYING → EXTRACTING → NEEDS_REVIEW | VERIFIED, FAILED on error.
+ * Retries and concurrency are the runner's job (DocumentPipelineRunner).
  */
-@Processor(DOCUMENTS_QUEUE, { concurrency: 4 })
-export class DocumentProcessor extends WorkerHost {
-  private readonly logger = new Logger(DocumentProcessor.name);
+@Injectable()
+export class DocumentPipelineService {
+  private readonly logger = new Logger(DocumentPipelineService.name);
 
   constructor(
     private readonly prisma: PrismaService,
@@ -32,35 +31,38 @@ export class DocumentProcessor extends WorkerHost {
     private readonly reminders: RemindersService,
     private readonly organizations: OrganizationsService,
     private readonly realtime: RealtimePublisher,
-  ) {
-    super();
-  }
+  ) {}
 
-  async process(job: Job<ProcessDocumentJob>): Promise<void> {
-    const { documentId } = job.data;
+  /**
+   * Processes one document. Returns false when the document no longer exists.
+   * On error, records the attempt; on the last attempt, or for an AppException (bad input, never worth retrying),
+   * marks the document FAILED and tells the supplier. Then rethrows so the runner can decide whether to retry.
+   */
+  async process(documentId: string, lastAttempt: boolean): Promise<boolean> {
     const doc = await this.prisma.document.findUnique({ where: { id: documentId } });
     if (!doc) {
       this.logger.warn(`Document ${documentId} no longer exists; skipping`);
-      return;
+      return false;
     }
-    const lastAttempt = job.attemptsMade + 1 >= (job.opts.attempts ?? 1);
     try {
       await this.run(doc.id, doc.supplierId, doc.fileKey, doc.fileName, doc.mimeType, doc.sha256);
+      return true;
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      const unrecoverable = err instanceof AppException;
-      this.logger.error(`Document ${documentId} failed (attempt ${job.attemptsMade + 1}): ${message}`);
-      await this.prisma.document.update({ where: { id: documentId }, data: { attempts: { increment: 1 }, error: message, ...(lastAttempt || unrecoverable ? { status: DocumentStatus.FAILED } : {}) } });
-      if (lastAttempt || unrecoverable) {
+      const final = lastAttempt || err instanceof AppException;
+      await this.prisma.document
+        .update({ where: { id: documentId }, data: { attempts: { increment: 1 }, error: message, ...(final ? { status: DocumentStatus.FAILED } : {}) } })
+        .catch(() => undefined);
+      if (final) {
         await this.realtime.toSupplier(doc.supplierId, SOCKET_EVENTS.documentStatus, { documentId, status: DocumentStatus.FAILED, progress: 0, error: message });
         await this.realtime.toSupplier(doc.supplierId, SOCKET_EVENTS.error, { code: 'EXTRACTION_FAILED', message: `${doc.fileName}: ${message}` });
       }
-      if (unrecoverable) throw new UnrecoverableError(message);
       throw err;
     }
   }
 
-  private async run(documentId: string, supplierId: string, fileKey: string, fileName: string, mimeType: string, sha256: string): Promise<void> {
+  /** Runs the pipeline for one document. Throws on failure; the runner decides about retries. */
+  async run(documentId: string, supplierId: string, fileKey: string, fileName: string, mimeType: string, sha256: string): Promise<void> {
     const settings = await this.organizations.resolveSettings(supplierId);
 
     await this.setStatus(documentId, supplierId, DocumentStatus.CONVERTING, PROGRESS.CONVERTING);

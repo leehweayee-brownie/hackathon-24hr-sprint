@@ -16,7 +16,6 @@
     "build": "npm run build -w @vp/shared -w @vp/rules && npm run build -w @vp/api && npm run build -w @vp/web",
     "build:packages": "npm run build -w @vp/shared -w @vp/rules",
     "dev:api": "npm run dev -w @vp/api",
-    "dev:worker": "npm run dev:worker -w @vp/api",
     "dev:web": "npm run dev -w @vp/web",
     "db:migrate": "npm run db:migrate -w @vp/api",
     "db:deploy": "npm run db:deploy -w @vp/api",

@@ -10,7 +10,7 @@ Before the demo: `npm run fixtures:generate && npm run db:seed` on the morning o
 | 4 | Back as supplier, Passport, create a share link, open it in a private window | "One passport, always current, shared by link. The supplier sees who looked and when." |
 
 Fallbacks:
-- Worker not processing: `npm run dev:worker` must be running; `GET /api/v1/admin/queue` shows counts.
+- Files stuck in Processing: check the API log; `GET /api/v1/admin/queue` shows counts. Restarting the API resumes documents left in progress.
 - Upload fails on stage: Mega Wira (`supplier@megawira.local`) is pre-processed; its passport and check are fully populated.
-- Model slow or rate limited: set `AI_PROVIDER=mock` in `apps/api/.env` and restart the API and worker.
+- Model slow or rate limited: set `AI_PROVIDER=mock` in `apps/api/.env` and restart the API.
 - Backup video recorded at the feature freeze.

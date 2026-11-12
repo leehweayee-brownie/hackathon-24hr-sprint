@@ -1,4 +1,3 @@
-import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
@@ -16,7 +15,6 @@ import { DatabaseModule } from './database/database.module';
 import { DocumentsModule } from './documents/documents.module';
 import { FieldsModule } from './fields/fields.module';
 import { HealthModule } from './health/health.module';
-import { QUEUE_PREFIX } from './intake/documents.queue';
 import { NotificationsModule } from './notifications/notifications.module';
 import { OrganizationsModule } from './organizations/organizations.module';
 import { PassportsModule } from './passports/passports.module';
@@ -30,10 +28,6 @@ import { VendorChecksModule } from './vendor-checks/vendor-checks.module';
     ConfigModule,
     DatabaseModule,
     StorageModule,
-    BullModule.forRootAsync({
-      inject: [AppConfigService],
-      useFactory: (config: AppConfigService) => ({ connection: config.redisOptions, prefix: QUEUE_PREFIX }),
-    }),
     ThrottlerModule.forRootAsync({
       inject: [AppConfigService],
       useFactory: (config: AppConfigService) => ({ throttlers: [{ ttl: config.get('RATE_LIMIT_TTL_SECONDS') * 1000, limit: config.get('RATE_LIMIT_MAX') }] }),

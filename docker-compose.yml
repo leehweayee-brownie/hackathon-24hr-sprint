@@ -68,20 +68,6 @@ services:
       minio:
         condition: service_healthy
 
-  worker:
-    profiles: ["app"]
-    build:
-      context: .
-      dockerfile: docker/api.Dockerfile
-    command: ["node", "dist/worker.js"]
-    env_file: apps/api/.env
-    environment:
-      DATABASE_URL: postgresql://${POSTGRES_USER:-vp}:${POSTGRES_PASSWORD:-vp}@postgres:5432/${POSTGRES_DB:-vendor_passport}
-      REDIS_URL: redis://redis:6379
-      S3_ENDPOINT: http://minio:9000
-    depends_on:
-      - api
-
   web:
     profiles: ["app"]
     build:

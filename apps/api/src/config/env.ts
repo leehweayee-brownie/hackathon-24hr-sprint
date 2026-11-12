@@ -42,6 +42,7 @@ export const envSchema = z.object({
   ODIN_TIMEOUT_MS: z.coerce.number().default(180_000),
   ODIN_PRINCIPAL_ID: z.string().default('system:vendor-passport'),
   AI_MAX_PAGES: z.coerce.number().default(20),
+  PIPELINE_CONCURRENCY: z.coerce.number().int().min(1).default(4),
   CONFIDENCE_THRESHOLD: z.coerce.number().min(0).max(1).default(0.85),
   EXPIRY_WARNING_DAYS: z.coerce.number().default(30),
   FIXTURES_DIR: z.string().default('../../fixtures'),

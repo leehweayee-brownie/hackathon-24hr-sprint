@@ -1,15 +1,17 @@
-import { BullModule } from '@nestjs/bullmq';
 import { Module } from '@nestjs/common';
 import { CrossCheckModule } from '../cross-check/cross-check.module';
-import { DOCUMENTS_QUEUE } from '../intake/documents.queue';
+import { ExtractionModule } from '../extraction/extraction.module';
+import { RemindersModule } from '../reminders/reminders.module';
 import { DocumentAccessService } from './document-access.service';
 import { DocumentsController } from './documents.controller';
 import { DocumentsService } from './documents.service';
+import { DocumentPipelineRunner } from './pipeline/document-pipeline.runner';
+import { DocumentPipelineService } from './pipeline/document-pipeline.service';
 
 @Module({
-  imports: [BullModule.registerQueue({ name: DOCUMENTS_QUEUE }), CrossCheckModule],
-  providers: [DocumentsService, DocumentAccessService],
+  imports: [ExtractionModule, CrossCheckModule, RemindersModule],
+  providers: [DocumentsService, DocumentAccessService, DocumentPipelineService, DocumentPipelineRunner],
   controllers: [DocumentsController],
-  exports: [DocumentsService, DocumentAccessService],
+  exports: [DocumentsService, DocumentAccessService, DocumentPipelineRunner],
 })
 export class DocumentsModule {}

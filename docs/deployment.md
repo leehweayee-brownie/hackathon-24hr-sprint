@@ -1,14 +1,13 @@
 # Deployment Guide
 
-Vendor Passport runs as three processes plus three backing services:
+Vendor Passport runs as two processes plus three backing services:
 
 | Process | Entry | Needs |
 |---|---|---|
-| `api` | `node dist/main.js` (NestJS REST + Socket.IO) | PostgreSQL, Redis, object storage |
-| `worker` | `node dist/worker.js` (BullMQ document pipeline, reminders cron) | PostgreSQL, Redis, object storage, AI key |
+| `api` | `node dist/main.js` (NestJS REST + Socket.IO, document pipeline) | PostgreSQL, Redis, object storage, AI key |
 | `web` | Next.js standalone server on :8888 | `NEXT_PUBLIC_API_URL` |
 
-The worker is a long-running process that pulls jobs from Redis, so the API tier belongs on a platform with persistent containers (Railway, Render, Fly.io, Cloud Run with min instances, a VM with Docker Compose). The web app deploys anywhere Next.js runs, including Vercel.
+The API processes uploaded documents in the background after it answers the upload, so it belongs on a platform with a long-running process (Railway, Render, Fly.io, Cloud Run with min instances and CPU always allocated, a VM with Docker Compose). Run one API instance: a document left in progress by a restart is resumed when the API starts, and two instances would both resume it. The web app deploys anywhere Next.js runs, including Vercel.
 
 ---
 
@@ -17,14 +16,14 @@ The worker is a long-running process that pulls jobs from Redis, so the API tier
 | Service | Why | Suggested source |
 |---|---|---|
 | **PostgreSQL** | all application data | Neon, Supabase, Cloud SQL, or the compose service |
-| **Redis** | job queue, realtime fan-out between worker and API, cache | Upstash Redis (TCP URL), Redis Cloud, Memorystore |
+| **Redis** | realtime events to browsers (pub/sub), health check | Upstash Redis (TCP URL), Redis Cloud, Memorystore |
 | **S3-compatible storage** | encrypted document files | AWS S3, Cloudflare R2, GCS (S3 interop), MinIO |
 
-Redis must support pub/sub (the worker publishes processing events that the API relays to browsers).
+Redis must support pub/sub (processing events go through Redis to the Socket.IO gateway).
 
 ---
 
-## 2. Environment variables (API and worker)
+## 2. Environment variables (API)
 
 Copy `apps/api/.env.example`. The important ones:
 
@@ -50,7 +49,7 @@ Never commit `.env` files. Keep keys in the platform's secret store.
 
 ```bash
 cp apps/api/.env.example apps/api/.env      # fill in secrets, set AI_PROVIDER=anthropic
-docker compose --profile app up --build -d  # postgres, redis, minio, api, worker, web
+docker compose --profile app up --build -d  # postgres, redis, minio, api, web
 ```
 
 The API container runs `prisma migrate deploy` on start. Put Nginx or Caddy in front for TLS (proxy `/` to :8888 and `/api`, `/docs`, `/socket.io` to :4000, with WebSocket upgrade headers).
@@ -63,12 +62,12 @@ docker compose --profile app exec api npm run db:seed -w @vp/api
 
 ---
 
-## 4. Railway / Render / Fly.io (API + worker) and Vercel (web)
+## 4. Railway / Render / Fly.io (API) and Vercel (web)
 
-1. Create two services from `docker/api.Dockerfile` (build context: repo root). Service A command: default (`node dist/main.js`). Service B command: `node dist/worker.js`. Give both the same environment variables.
+1. Create one service from `docker/api.Dockerfile` (build context: repo root) with the default command (`node dist/main.js`).
 2. Attach managed Postgres and Redis; set the storage variables to your bucket.
-3. Deploy the web app on Vercel with Root Directory `apps/web`, Install Command `cd ../.. && npm ci`, Build Command `cd ../.. && npm run build:packages && npm run build -w @vp/web`, and `NEXT_PUBLIC_API_URL` set to service A's URL.
-4. Set the API's `CORS_ORIGIN` and `WEB_URL` to the Vercel URL and redeploy service A.
+3. Deploy the web app on Vercel with Root Directory `apps/web`, Install Command `cd ../.. && npm ci`, Build Command `cd ../.. && npm run build:packages && npm run build -w @vp/web`, and `NEXT_PUBLIC_API_URL` set to the API's URL.
+4. Set the API's `CORS_ORIGIN` and `WEB_URL` to the Vercel URL and redeploy the API.
 
 Verify:
 

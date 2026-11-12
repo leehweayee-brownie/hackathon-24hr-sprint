@@ -122,7 +122,7 @@ CIDB grade limits are configuration, not code (`packages/rules/src/config/cidb-g
 
 - Timeline of every document's validity
 - Amber within 30 days of expiry, red when expired
-- Automatic reminders to the supplier at 60, 30 and 7 days before expiry, and on the day
+- Reminders to the supplier at 60, 30 and 7 days before expiry, and on the day, sent when an admin runs them (Administration, or `POST /admin/reminders/run`); there is no automatic schedule
 - Buyers holding a share link are notified when a document they rely on expires or is renewed
 
 ---
@@ -183,7 +183,7 @@ Role-gated `/admin` screen.
 - TypeScript
 - PostgreSQL
 - Prisma ORM
-- BullMQ (document processing jobs)
+- In-process document pipeline (background processing after upload, retries, concurrency limit)
 - Socket.IO Gateway (processing progress)
 - Vision AI model through GT-Odin or the Anthropic API (classification and extraction)
 - Passport JWT
@@ -198,7 +198,7 @@ Role-gated `/admin` screen.
 
 PostgreSQL
 
-Redis (job queue, cache)
+Redis (realtime events)
 
 S3-compatible object storage with server-side encryption in deployed environments; a local `uploads/` folder in development
 
@@ -227,7 +227,7 @@ UPLOADED → CONVERTING → CLASSIFYING → EXTRACTING → NEEDS_REVIEW ─┐
                           any step ── error ──→ FAILED (retry up to 3 times)
 ```
 
-1. The file is stored encrypted in object storage and a job is queued.
+1. The file is stored encrypted in object storage and the API starts processing it in the background.
 2. Pages are converted to images.
 3. The vision model classifies the document type.
 4. The vision model extracts the fields for that type, with a bounding box and confidence for each value. Output is validated against a Zod schema; invalid output is retried.
@@ -279,7 +279,7 @@ modules
 ├── users
 ├── organizations
 ├── documents
-├── intake          (upload, queue)
+├── intake          (upload, background pipeline; in documents/pipeline)
 ├── extraction      (AI calls, schemas, normalization)
 ├── cross-check
 ├── trust-score
@@ -684,7 +684,7 @@ Frontend
 
 # Performance
 
-- Documents processed in parallel by queue workers
+- Documents processed in parallel in the API, with a concurrency limit
 - Pages downscaled before sending to the model
 - Extraction cached by file hash (same file is never read twice)
 - Only affected rules rerun when one document changes
@@ -714,7 +714,6 @@ npm run db:seed             # demo organizations, users and documents (wipes exi
 
 # 4. Run
 npm run dev:api             # http://localhost:4000/api/v1  (Swagger: http://localhost:4000/docs)
-npm run dev:worker          # document processing worker
 npm run dev:web             # http://localhost:8888
 ```
 

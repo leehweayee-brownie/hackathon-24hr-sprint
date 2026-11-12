@@ -3,7 +3,7 @@
 ## Workspaces
 - `packages/shared` (`@vp/shared`): enums, doc-type field definitions, API/socket types, constants. CommonJS build in `dist/`. Rebuild after edits: `npm run build -w @vp/shared`.
 - `packages/rules` (`@vp/rules`): pure rules engine (`evaluate`, `runCrossChecks`, `computeTrustScore`, `buildTimeline`, normalizers, `cidb-grades`). No framework or AI imports.
-- `apps/api` (`@vp/api`): NestJS API (`src/main.ts`) and worker (`src/worker.ts`). Prisma schema in `prisma/schema.prisma`, seed in `prisma/seed.ts`.
+- `apps/api` (`@vp/api`): NestJS API (`src/main.ts`). It also runs the document pipeline in the background (`src/documents/pipeline/`, concurrency `PIPELINE_CONCURRENCY`, 3 attempts, resumes unfinished documents on boot) Due reminders are sent only through `POST /admin/reminders/run` (no automatic schedule). Prisma schema in `prisma/schema.prisma`, seed in `prisma/seed.ts`.
 - `apps/web` (`@vp/web`): Next.js app on :8888.
 - `fixtures` (`@vp/fixtures`): generator for fictional demo documents + recorded extractions.
 
@@ -20,7 +20,7 @@
 ## Realtime
 - Socket.IO namespace `/intake`, JWT in handshake `auth.token`. Users auto-join `org:<organizationId>`.
 - Buyers emit `subscribe:supplier` `{ supplierId }` to join `supplier:<id>` (allowed when they have a vendor check with that supplier).
-- Worker publishes events to Redis channel `vp:realtime` as `{ rooms: string[], event, payload }`; the API gateway subscribes and emits.
+- The pipeline publishes events to Redis channel `vp:realtime` as `{ rooms: string[], event, payload }`; the API gateway subscribes and emits.
 
 ## Storage
 - Object key: `suppliers/<supplierId>/documents/<documentId>/<original file name>`.

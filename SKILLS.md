@@ -210,7 +210,7 @@ Frontend
 - Repository Pattern
 - Strategy Pattern (`ExtractionProvider`: Anthropic vision model or recorded mock)
 - Factory Pattern (storage adapter: S3-compatible or local disk)
-- Adapter Pattern (Redis pub/sub bridge between the worker and the Socket.IO gateway)
+- Adapter Pattern (Redis pub/sub bridge between the document pipeline and the Socket.IO gateway)
 - Pipeline / State Machine (document processing states)
 - Singleton Pattern (validated configuration)
 - Pure Functions (rules engine: same input, same findings and score)

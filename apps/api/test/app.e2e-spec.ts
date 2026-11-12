@@ -1,13 +1,14 @@
 /**
  * End-to-end: register → login → upload a PNG (AI_PROVIDER=mock) → documents list → passport.
  * Needs the local Postgres, Redis and object store from docker compose (apps/api/.env).
- * The pipeline runs when a worker is up; without one the upload still succeeds and the document stays UPLOADED.
+ * The pipeline runs inside the API in the background after upload; the test waits for it before asserting and cleaning up.
  */
 import { INestApplication, ValidationPipe } from '@nestjs/common';
 import { Test } from '@nestjs/testing';
 import request from 'supertest';
 import { AppModule } from '../src/app.module';
 import { PrismaService } from '../src/database/prisma.service';
+import { DocumentPipelineRunner } from '../src/documents/pipeline/document-pipeline.runner';
 
 // 1x1 transparent PNG
 const PNG = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==', 'base64');
@@ -28,6 +29,8 @@ describe('Vendor Passport API (e2e)', () => {
   });
 
   afterAll(async () => {
+    // Let background processing finish before deleting what it writes to.
+    await app.get(DocumentPipelineRunner).idle();
     // Leave no trace in the shared development database.
     const prisma = app.get(PrismaService);
     const user = await prisma.user.findUnique({ where: { email } });
@@ -79,6 +82,17 @@ describe('Vendor Passport API (e2e)', () => {
 
     const file = await request(app.getHttpServer()).get(`/api/v1/documents/${up.body.data[0].id}/file`).set('authorization', `Bearer ${accessToken}`).expect(200);
     expect(file.body.data.url).toMatch(/^https?:\/\//);
+  });
+
+  it('processes the upload in the API without a worker', async () => {
+    const list = await request(app.getHttpServer()).get('/api/v1/documents').set('authorization', `Bearer ${accessToken}`).expect(200);
+    const id = list.body.data.find((d: { fileName: string }) => d.fileName === 'site-photo.png').id as string;
+    await app.get(DocumentPipelineRunner).idle();
+    const doc = await request(app.getHttpServer()).get(`/api/v1/documents/${id}`).set('authorization', `Bearer ${accessToken}`).expect(200);
+    // The mock provider has no recording for this file, so it is kept as OTHER and not scored.
+    expect(doc.body.data.status).toBe('VERIFIED');
+    expect(doc.body.data.docType).toBe('OTHER');
+    expect(doc.body.data.progress).toBe(100);
   });
 
   it('rejects unsupported files on content, not extension', async () => {

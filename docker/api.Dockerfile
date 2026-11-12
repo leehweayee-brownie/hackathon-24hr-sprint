@@ -1,8 +1,7 @@
-# Vendor Passport API / worker image. Build from the repository root:
+# Vendor Passport API image. The API also runs document processing and the reminder schedule.
+# Build from the repository root:
 #   docker build -f docker/api.Dockerfile -t vendor-passport-api .
-# Run the API (default) or the worker:
 #   docker run --env-file apps/api/.env -p 4000:4000 vendor-passport-api
-#   docker run --env-file apps/api/.env vendor-passport-api node dist/worker.js
 
 FROM node:22-alpine AS build
 WORKDIR /app
@@ -40,6 +39,6 @@ WORKDIR /app/apps/api
 ENV PORT=4000 FIXTURES_DIR=../../fixtures
 EXPOSE 4000
 HEALTHCHECK --interval=30s --timeout=5s CMD wget -qO- http://localhost:4000/api/v1/health || exit 1
-# Applies pending migrations, then starts the API. Override CMD with `node dist/worker.js` for the worker.
+# Applies pending migrations, then starts the API.
 ENTRYPOINT ["/bin/sh", "-c", "npx prisma migrate deploy && exec \"$@\"", "--"]
 CMD ["node", "dist/main.js"]

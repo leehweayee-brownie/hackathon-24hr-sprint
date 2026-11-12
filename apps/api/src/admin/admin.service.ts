@@ -1,8 +1,6 @@
-import { InjectQueue } from '@nestjs/bullmq';
 import { Inject, Injectable } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { DOC_TYPE_DEFINITIONS, DocumentStatus } from '@vp/shared';
-import type { Queue } from 'bullmq';
 import type { Redis } from 'ioredis';
 import { AuditService } from '../audit/audit.service';
 import { Paginated, PaginationQuery } from '../common/dto/pagination';
@@ -11,7 +9,7 @@ import type { RequestUser } from '../common/types';
 import { CrossCheckService } from '../cross-check/cross-check.service';
 import { PrismaService } from '../database/prisma.service';
 import { REDIS_CLIENT } from '../database/redis.provider';
-import { DOCUMENTS_QUEUE } from '../intake/documents.queue';
+import { DocumentPipelineRunner, IN_PIPELINE_STATUSES } from '../documents/pipeline/document-pipeline.runner';
 import { OrganizationsService, SYSTEM_RULES_KEY, sanitizeWeights } from '../organizations/organizations.service';
 import { RemindersService } from '../reminders/reminders.service';
 import type { UpdateRulesDto } from './dto/admin.dto';
@@ -24,7 +22,7 @@ export class AdminService {
     private readonly crossCheck: CrossCheckService,
     private readonly reminders: RemindersService,
     private readonly audit: AuditService,
-    @InjectQueue(DOCUMENTS_QUEUE) private readonly queue: Queue,
+    private readonly pipeline: DocumentPipelineRunner,
     @Inject(REDIS_CLIENT) private readonly redis: Redis,
   ) {}
 
@@ -100,18 +98,27 @@ export class AdminService {
     return this.rules();
   }
 
+  /** Processing health. The pipeline runs inside the API, so counts come from document statuses plus the runner. */
   async queue_() {
-    const counts = await this.queue.getJobCounts('waiting', 'active', 'completed', 'failed', 'delayed', 'paused');
-    const [failedDocuments, inProgress, byStatus] = await Promise.all([
+    const [failedDocuments, byStatus] = await Promise.all([
       this.prisma.document.findMany({ where: { status: DocumentStatus.FAILED }, orderBy: { updatedAt: 'desc' }, take: 20, include: { supplier: { select: { name: true } } } }),
-      this.prisma.document.count({ where: { status: { in: [DocumentStatus.UPLOADED, DocumentStatus.CONVERTING, DocumentStatus.CLASSIFYING, DocumentStatus.EXTRACTING] } } }),
       this.prisma.document.groupBy({ by: ['status'], _count: { _all: true } }),
     ]);
+    const count = (statuses: DocumentStatus[]) => byStatus.filter((s) => statuses.includes(s.status as DocumentStatus)).reduce((n, s) => n + s._count._all, 0);
+    const inProgress = count(IN_PIPELINE_STATUSES);
+    const runner = this.pipeline.stats();
     const redis = await this.redis.ping().then(() => 'up' as const).catch(() => 'down' as const);
     return {
-      queue: DOCUMENTS_QUEUE,
+      queue: 'in-process',
       redis,
-      counts,
+      counts: {
+        waiting: count([DocumentStatus.UPLOADED]),
+        active: count([DocumentStatus.CONVERTING, DocumentStatus.CLASSIFYING, DocumentStatus.EXTRACTING]),
+        completed: count([DocumentStatus.VERIFIED, DocumentStatus.NEEDS_REVIEW]),
+        failed: count([DocumentStatus.FAILED]),
+        delayed: 0,
+      },
+      runner,
       inProgress,
       byStatus: Object.fromEntries(byStatus.map((s) => [s.status, s._count._all])),
       failedDocuments: failedDocuments.map((d) => ({ id: d.id, fileName: d.fileName, supplierId: d.supplierId, supplierName: d.supplier.name, error: d.error, attempts: d.attempts, updatedAt: d.updatedAt.toISOString() })),

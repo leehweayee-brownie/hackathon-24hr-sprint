@@ -3,7 +3,7 @@ import { AuthModule } from '../auth/auth.module';
 import { RealtimeGateway } from './realtime.gateway';
 import { RealtimePublisher } from './realtime.publisher';
 
-/** API side: gateway + publisher. */
+/** Socket.IO gateway plus the publisher that services use to emit through Redis. */
 @Global()
 @Module({
   imports: [AuthModule],
@@ -11,11 +11,3 @@ import { RealtimePublisher } from './realtime.publisher';
   exports: [RealtimePublisher],
 })
 export class RealtimeModule {}
-
-/** Worker side: publisher only (no socket server). */
-@Global()
-@Module({
-  providers: [RealtimePublisher],
-  exports: [RealtimePublisher],
-})
-export class RealtimePublisherModule {}

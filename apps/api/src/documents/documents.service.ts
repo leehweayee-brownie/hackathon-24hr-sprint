@@ -1,8 +1,6 @@
-import { InjectQueue } from '@nestjs/bullmq';
 import { HttpStatus, Injectable, Logger } from '@nestjs/common';
 import type { Prisma } from '@prisma/client';
 import { DocumentStatus, DocumentView, ErrorCode, MAX_FILES_PER_UPLOAD, OrganizationType, SUPPORTED_MIME_TYPES } from '@vp/shared';
-import type { Queue } from 'bullmq';
 import { fromBuffer as fileTypeFromBuffer } from 'file-type';
 import { posix, win32 } from 'node:path';
 import { AuditService } from '../audit/audit.service';
@@ -13,12 +11,12 @@ import { sha256 } from '../common/utils/crypto';
 import { AppConfigService } from '../config/config.service';
 import { CrossCheckService } from '../cross-check/cross-check.service';
 import { PrismaService } from '../database/prisma.service';
-import { DOCUMENTS_QUEUE, PROCESS_DOCUMENT_JOB, ProcessDocumentJob } from '../intake/documents.queue';
 import { OrganizationsService } from '../organizations/organizations.service';
 import { documentKey } from '../storage/adapters/storage.adapter';
 import { StorageService } from '../storage/storage.service';
 import { DocumentAccessService } from './document-access.service';
 import { toDocumentView } from './document.mapper';
+import { DocumentPipelineRunner } from './pipeline/document-pipeline.runner';
 import type { ListDocumentsQuery } from './dto/documents.dto';
 
 export interface UploadedFile {
@@ -42,10 +40,10 @@ export class DocumentsService {
     private readonly organizations: OrganizationsService,
     private readonly crossCheck: CrossCheckService,
     private readonly audit: AuditService,
-    @InjectQueue(DOCUMENTS_QUEUE) private readonly queue: Queue<ProcessDocumentJob>,
+    private readonly pipeline: DocumentPipelineRunner,
   ) {}
 
-  /** Stores each file, detects duplicates and queues processing. */
+  /** Stores each file, detects duplicates and starts processing in the background. */
   async upload(user: RequestUser, files: UploadedFile[], ip?: string): Promise<DocumentView[]> {
     if (user.organizationType !== OrganizationType.SUPPLIER) throw AppException.forbidden('Only suppliers upload documents');
     if (!files || files.length === 0) throw new AppException(ErrorCode.VALIDATION_FAILED, 'No files were uploaded');
@@ -116,8 +114,9 @@ export class DocumentsService {
     return created;
   }
 
+  /** Starts processing in the background, in this process. Returns at once. */
   async enqueue(documentId: string): Promise<void> {
-    await this.queue.add(PROCESS_DOCUMENT_JOB, { documentId }, { attempts: 3, backoff: { type: 'exponential', delay: 2000 }, removeOnComplete: 500, removeOnFail: 1000 });
+    this.pipeline.schedule(documentId);
   }
 
   async list(user: RequestUser, query: ListDocumentsQuery): Promise<Paginated<DocumentView>> {

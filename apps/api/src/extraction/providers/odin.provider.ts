@@ -76,8 +76,12 @@ export class OdinExtractionProvider implements ExtractionProvider {
     return { fields: extractionSchema.parse(json).fields };
   }
 
-  private async ask(input: DocumentInput, instruction: string, purpose: string): Promise<unknown> {
-    const attachments = this.attachmentsFor(input);
+  async completeJson(instruction: string, input?: DocumentInput): Promise<unknown> {
+    return this.ask(input, instruction, 'complete');
+  }
+
+  private async ask(input: DocumentInput | undefined, instruction: string, purpose: string): Promise<unknown> {
+    const attachments = input ? this.attachmentsFor(input) : undefined;
     const sessionId = await this.createSession(input, purpose);
     try {
       const first = await this.sendMessage(sessionId, `${SYSTEM_PROMPT}\n\n${instruction}`, attachments);
@@ -104,10 +108,10 @@ export class OdinExtractionProvider implements ExtractionProvider {
     return images.map((img, i) => ({ data: img.toString('base64'), mime_type: 'image/jpeg', filename: `${stem(input.fileName)}-page-${i + 1}.jpg` }));
   }
 
-  private async createSession(input: DocumentInput, purpose: string): Promise<string> {
+  private async createSession(input: DocumentInput | undefined, purpose: string): Promise<string> {
     const session = await this.request<{ id: string }>('POST', '/v1/sessions', {
       external_principal_id: this.options.principalId,
-      external_metadata: { app: 'vendor-passport', purpose, sha256: input.sha256 },
+      external_metadata: { app: 'vendor-passport', purpose, ...(input ? { sha256: input.sha256 } : {}) },
       model: this.options.model,
     });
     if (!session?.id) throw new OdinError('Odin did not return a session id');

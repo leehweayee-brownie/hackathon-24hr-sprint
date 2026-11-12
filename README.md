@@ -146,6 +146,19 @@ CIDB grade limits are configuration, not code (`packages/rules/src/config/cidb-g
 - Approve, reject or request more documents (supplier is notified)
 - Approver sign-off above a configurable contract value
 - Full audit log of every view, correction and decision
+- Rate an approved vendor after the job (1–5 stars); ratings rank future Vendor Match shortlists
+
+---
+
+## Vendor Match (buyer side)
+
+Find → Check → Award → Rate. The buyer gives the brief however they have it: paste a paragraph, upload the RFQ, or fill 5 quick fields.
+
+1. **Requirements.** The AI drafts structured requirements (scope, value, location, contract period, minimum CIDB grade, minimum public liability, required documents); the buyer confirms or edits them. Without an AI provider a built-in reader parses the text. The minimum grade is derived from the value when the brief does not state it.
+2. **Shortlist.** The rules engine decides fit from verified document facts only: actual grade, actual cover, and validity across the whole contract period. Each supplier is *qualified*, *conditional* (fixable gaps, e.g. a missing bank letter) or *excluded* (e.g. "G5 caps at RM5M"), always with the reason. Ranking: fit, fewest gaps, past-job ratings, trust score.
+3. **Act.** "Invite to tender" opens a vendor check and notifies the supplier; "Request document" also asks for exactly the documents that would make them qualify.
+
+The AI never decides a fit. It only reads the brief; the reasons are written from rule results, so decisions stay deterministic.
 
 ---
 
@@ -572,6 +585,16 @@ POST /vendor-checks/:id/approve
 
 POST /vendor-checks/:id/reject
 
+POST /vendor-checks/:id/rating — rate an approved vendor (1–5, optional comment)
+
+POST /vendor-match/brief — draft requirements from text or an uploaded RFQ (`file`)
+
+POST /vendor-match/shortlist — ranked suppliers with fit, strengths and gaps
+
+POST /vendor-match/invite — open a vendor check for a supplier
+
+POST /vendor-match/request-documents — open the check and ask for the missing documents
+
 POST /access-requests — ask a supplier for their passport
 
 ---
@@ -711,6 +734,7 @@ npm run build -w @vp/shared -w @vp/rules
 cp apps/api/.env.example apps/api/.env   # set ANTHROPIC_API_KEY
 npm run db:migrate          # prisma migrate dev
 npm run db:seed             # demo organizations, users and documents (wipes existing data)
+npm run db:seed:match -w @vp/api   # Vendor Match demo suppliers and rated past jobs (additive, safe to re-run)
 
 # 4. Run
 npm run dev:api             # http://localhost:4000/api/v1  (Swagger: http://localhost:4000/docs)

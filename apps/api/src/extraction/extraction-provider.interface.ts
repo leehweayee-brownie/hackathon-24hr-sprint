@@ -14,6 +14,11 @@ export interface ExtractionProvider {
   readonly name: string;
   classify(input: DocumentInput): Promise<ClassificationResult>;
   extract(input: DocumentInput, docType: DocType): Promise<ExtractionResult>;
+  /**
+   * Free-form JSON task (e.g. turning a tender brief into requirements), optionally with a document attached.
+   * Providers that cannot do this (the offline mock) leave it out and callers fall back to deterministic code.
+   */
+  completeJson?(instruction: string, input?: DocumentInput): Promise<unknown>;
 }
 
 export const EXTRACTION_PROVIDER = Symbol('EXTRACTION_PROVIDER');

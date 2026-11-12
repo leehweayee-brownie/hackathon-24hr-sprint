@@ -30,9 +30,14 @@ export class AnthropicExtractionProvider implements ExtractionProvider {
     return { fields: parsed.fields, usage };
   }
 
-  /** Sends the document plus an instruction; retries once when the reply is not valid JSON. */
-  private async ask(input: DocumentInput, instruction: string, maxTokens: number): Promise<{ json: unknown; usage: TokenUsage }> {
-    const content: ContentBlock[] = [...this.documentBlocks(input), { type: 'text', text: instruction }];
+  async completeJson(instruction: string, input?: DocumentInput): Promise<unknown> {
+    const { json } = await this.ask(input, instruction, 2000);
+    return json;
+  }
+
+  /** Sends the document (if any) plus an instruction; retries once when the reply is not valid JSON. */
+  private async ask(input: DocumentInput | undefined, instruction: string, maxTokens: number): Promise<{ json: unknown; usage: TokenUsage }> {
+    const content: ContentBlock[] = [...(input ? this.documentBlocks(input) : []), { type: 'text', text: instruction }];
     let usage: TokenUsage = { inputTokens: 0, outputTokens: 0 };
     let lastError: Error | null = null;
     for (let attempt = 0; attempt < 2; attempt += 1) {

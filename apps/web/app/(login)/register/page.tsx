@@ -10,6 +10,7 @@ import { z } from 'zod';
 import { authService } from '@/services/auth';
 import { errorMessage } from '@/services/http';
 import { useAuthStore } from '@/store/auth';
+import { useUiStore } from '@/store/ui';
 import { cn } from '@/utils/cn';
 import { homeForUser } from '@/utils/roles';
 
@@ -38,6 +39,8 @@ export default function RegisterPage() {
     setError(null);
     try {
       const res = await authService.register(values);
+      // A new account starts with the default pointer, not a cursor theme left by a previous user of this browser.
+      useUiStore.getState().setCursorTheme('none');
       if ('tokens' in res) {
         setSession(res.user, res.tokens);
         router.replace(homeForUser(res.user));

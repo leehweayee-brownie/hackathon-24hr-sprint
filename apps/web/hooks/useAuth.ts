@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { authService } from '@/services/auth';
 import { disconnectSocket } from '@/socket/client';
 import { useAuthStore } from '@/store/auth';
+import { useUiStore } from '@/store/ui';
 import { homeForUser } from '@/utils/roles';
 
 export function useAuth() {
@@ -40,6 +41,8 @@ export function useLogout() {
     clear();
     disconnectSocket();
     qc.clear();
+    // Signing out returns the browser to the default pointer; the next user picks their own cursor.
+    useUiStore.getState().setCursorTheme('none');
     router.replace('/login');
   };
 }
